@@ -17,6 +17,7 @@ import {
   ModalFooter,
   Button,
   useDisclosure,
+  Checkbox,
 } from "@nextui-org/react";
 // import { SearchIcon } from "./SearchIcon";
 import { AddIcon } from "./AddIcon";
@@ -49,7 +50,7 @@ export default function Header() {
         <Button onPress={onOpen} className="post-pro bg-default-50 text-md" endContent={<AddIcon />}>
           New
         </Button>
-        <Modal isOpen={isOpen} onOpenChange={onOpenChange}>
+        <Modal isOpen={isOpen} onOpenChange={onOpenChange} size="lg">
           <ModalContent className="text-default-800">
             {(onClose) => (
               <>
@@ -57,7 +58,12 @@ export default function Header() {
                   Create New Project
                 </ModalHeader>
                 <ModalBody>
-                  Create New Post
+                  <Input type="text" variant={'underlined'} label="Choose a topic" description="Enter a topic you want to post on." />
+                  <div className="grid grid-cols-2 gap-4">
+                    <Input type="number" variant={'underlined'} label="Caption Limit" description="Enter a limit for your post caption." />
+                    <Input type="number" variant={'underlined'} label="No. of post" description="Enter how many post you want to generate." />
+                  </div>
+                  <Checkbox defaultSelected>Add hashtags?</Checkbox>
                 </ModalBody>
                 <ModalFooter>
                   <Button className="text-default-800 post-pro bg-primary-100" variant="light" onPress={onClose}>
