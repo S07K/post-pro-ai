@@ -21,17 +21,17 @@ import PostOption from "./PostOption";
 import { CommentIcon } from "./CommentIcon";
 import { ShareIcon } from "./ShareIcon";
 
-export default function PostCard({ cardDetails, fullView }: { cardDetails: any; fullView?: boolean }) {
+export default function PostCard({ cardDetails, fullView, isClickable = true }: { cardDetails: any; fullView?: boolean; isClickable?: boolean }) {
   const {isOpen, onOpen, onOpenChange} = useDisclosure();
   const [isActive, setIsActive]: any = useState(null);
 
   const handleClick = () => {
     onOpen();
-    setIsActive(<PostCard fullView={true} cardDetails={cardDetails} />);
+    setIsActive(<PostCard fullView={true} cardDetails={cardDetails} isClickable={false} />);
   };
   
   return (
-    <div onClick={handleClick} className="hover:cursor-pointer">
+    <div onClick={isClickable ? () => {handleClick()} : () => {}} className="hover:cursor-pointer">
       <Card className="py-1 w-[300px]">
         {/* <CardHeader className="pt-0 pb-1">
             <div className="flex gap-5">
