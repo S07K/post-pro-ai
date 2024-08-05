@@ -6,6 +6,17 @@
   --foreground-rgb: 0, 0, 0;
   --background-start-rgb: 214, 219, 220;
   --background-end-rgb: 255, 255, 255;
+  --color-50: #f0f3f6;
+  --color-100: #e1e7ed;
+  --color-200: #c3cfdc;
+  --color-300: #a5b7ca;
+  --color-400: #879fb9;
+  --color-500: #6482AD;
+  --color-600: #556b94;
+  --color-700: #45557b;
+  --color-800: #364062;
+  --color-900: #293547;
+  --color-dark: #000000;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -18,16 +29,35 @@
 
 body {
   color: rgb(var(--foreground-rgb));
-  background: linear-gradient(
+  /* background: linear-gradient(
       to bottom,
       transparent,
       rgb(var(--background-end-rgb))
     )
-    rgb(var(--background-start-rgb));
+    rgb(var(--background-start-rgb)); */
 }
 
 @layer utilities {
   .text-balance {
     text-wrap: balance;
+  }
+
+  .webkit-box {
+    display: -webkit-box;
+  }
+  .webkit-line-clamp-2 {
+    -webkit-line-clamp: 2;
+  }
+  .webkit-box-orient-vertical {
+    -webkit-box-orient: vertical;
+  }
+
+  .hide-scroll {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  header {
+    max-width: 1440px !important;
   }
 }
