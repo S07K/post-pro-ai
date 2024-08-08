@@ -21,9 +21,47 @@ import {
 } from "@nextui-org/react";
 // import { SearchIcon } from "./SearchIcon";
 import { AddIcon } from "./AddIcon";
+import axios from "axios";
 
 export default function Header() {
-  const {isOpen, onOpen, onOpenChange} = useDisclosure();
+  const { isOpen, onOpen, onOpenChange, onClose } = useDisclosure();
+  const [project, setProject] = React.useState({});
+  const [isLoading, setLoading] = React.useState(false);
+
+  const handleChange = (event: any) => {
+    setProject({
+      ...project,
+      [event.target.name]: event.target.value,
+    });
+  };
+
+  const onSubmit = async () => {
+    setLoading(true);
+    await axios.post('/api/check_key', project).then(async (response) => {
+      if(response?.data?.status === 'success') {
+        await axios.post('/api/projects', project).then((response) => {
+          if(response?.data?.status === 'success') {
+            setLoading(false);
+            onClose();
+          } else {
+            console.error('Error in creating project: ', response?.data?.message);
+            setLoading(false);
+          }
+        }).catch((error) => {
+          console.error('Error in creating project: ', error);
+          setLoading(false);
+        });
+      } else {
+        console.error('Error in check_key: ', response?.data?.message);
+        setLoading(false);
+      }
+    }).catch((error) => {
+      console.error('Error in check_key: ', error);
+      setLoading(false);
+      setLoading(false);
+    });
+  }
+
   return (
     <Navbar className="bg-[#000]">
       <NavbarContent justify="start">
@@ -47,7 +85,11 @@ export default function Header() {
         />
       </NavbarContent> */}
       <NavbarContent as="div" className="items-center" justify="end">
-        <Button onPress={onOpen} className="post-pro bg-default-50 text-md" endContent={<AddIcon />}>
+        <Button
+          onPress={onOpen}
+          className="post-pro bg-default-50 text-md"
+          endContent={<AddIcon />}
+        >
           New
         </Button>
         <Modal isOpen={isOpen} onOpenChange={onOpenChange} size="lg">
@@ -58,18 +100,47 @@ export default function Header() {
                   Create New Project
                 </ModalHeader>
                 <ModalBody>
-                  <Input type="text" variant={'underlined'} label="Choose a topic" description="Enter a topic you want to post on." />
-                  <div className="grid grid-cols-2 gap-4">
-                    <Input type="number" variant={'underlined'} label="Caption Limit" description="Enter a limit for your post caption." />
-                    <Input type="number" variant={'underlined'} label="No. of post" description="Enter how many post you want to generate." />
-                  </div>
-                  <Checkbox defaultSelected>Add hashtags?</Checkbox>
+                  <Input
+                    name="title"
+                    onChange={handleChange}
+                    type="text"
+                    variant={"underlined"}
+                    label="Choose a topic"
+                    description="Enter a topic you want to post on."
+                  />
+                  {/* <div className="grid grid-cols-2 gap-4">
+                    <Input name="captionLimit" onChange={handleChange} type="number" variant={'underlined'} label="Caption Limit" description="Enter a limit for your post caption." />
+                    <Input name="postLimit" onChange={handleChange} type="number" variant={'underlined'} label="No. of post" description="Enter how many post you want to generate." />
+                  </div> */}
+                  <Input
+                    name="openAIKey"
+                    onChange={handleChange}
+                    type="text"
+                    variant={"underlined"}
+                    label="Openai api key"
+                    description="Add your openai api key"
+                  />
+                  {/* <Checkbox
+                    name="hashtags"
+                    onChange={handleChange}
+                    defaultSelected
+                  >
+                    Add hashtags?
+                  </Checkbox> */}
                 </ModalBody>
                 <ModalFooter>
-                  <Button className="text-default-800 post-pro bg-primary-100" variant="light" onPress={onClose}>
+                  <Button
+                    className="text-default-800 post-pro bg-primary-100"
+                    variant="light"
+                    onPress={onClose}
+                  >
                     Cancel
                   </Button>
-                  <Button className="post-pro bg-primary-500 text-default-50" onPress={onClose}>
+                  <Button
+                    className="post-pro bg-primary-500 text-default-50"
+                    onPress={onSubmit}
+                    isLoading={isLoading}
+                  >
                     Save
                   </Button>
                 </ModalFooter>
