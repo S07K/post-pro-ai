@@ -16,13 +16,13 @@ import {
   Button,
   useDisclosure,
 } from "@nextui-org/react";
-import { HeartIcon } from "../../icons/HeartIcon";
-import PostOption from "../../components/PostOption";
-import { CommentIcon } from "../../icons/CommentIcon";
-import { ShareIcon } from "../../icons/ShareIcon";
+import PostOption from "./PostOption";
+import { HeartIcon } from "../icons/HeartIcon";
+import { CommentIcon } from "../icons/CommentIcon";
+import { ShareIcon } from "../icons/ShareIcon";
 
 export default function PostCard({ cardDetails, fullView, isClickable = true }: { cardDetails: any; fullView?: boolean; isClickable?: boolean }) {
-  const {isOpen, onOpen, onOpenChange, onClose} = useDisclosure();
+  const {isOpen, onOpen, onOpenChange} = useDisclosure();
   const [isActive, setIsActive]: any = useState(null);
 
   const handleClick = () => {

@@ -1,9 +1,9 @@
 import React from "react";
 import InfoCard from "./InfoCard";
-import { GraphIcon } from "./GraphIcon";
-import { FollowersIcon } from "./FollowersIcon";
+import { GraphIcon } from "../../icons/GraphIcon";
+import { FollowersIcon } from "../../icons/FollowersIcon";
 import PostViewsChart from "./AreaChartContainer";
-import { LikesIcon } from "./LikesIcon";
+import { LikesIcon } from "../../icons/LikesIcon";
 
 interface AnalyticsProps {
   // Define the props for the Analytics component here
@@ -73,7 +73,7 @@ const Analytics: React.FC<AnalyticsProps> = () => {
   ]
   return (
     <>
-      <section className="pt-4 flex gap-6 flex-col sm:flex-row">
+      <section id="analytics" className="pt-4 flex gap-6 flex-col sm:flex-row">
         <InfoCard
           title="Total post views"
           start={2000}

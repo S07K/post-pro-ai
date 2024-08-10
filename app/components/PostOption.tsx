@@ -12,13 +12,13 @@ const PostOption: React.FC<PostOptionProps> = (props) => {
         <Button
           isIconOnly
           size='sm'
-          className="grid justify-start bg-default-0 mb-1 rounded-none"
+          className="h-full grid justify-start bg-default-0 mb-1 rounded-none"
           disableRipple
           disabled
         >
           <div className="grid grid-flow-row auto-rows-min justify-items-center">
             {props.icon}
-            <small className="mt-0">{props.count}</small>
+            <small className="mt-0 text-[11px]">{props.count}</small>
           </div>
         </Button>
     );
