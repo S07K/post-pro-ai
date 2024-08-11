@@ -46,7 +46,7 @@ export default function ProjectsTable() {
       </TableHeader>
       <TableBody emptyContent={"No rows to display."} isLoading={isLoading}>
         {projects.map((project: any, index: number) => (
-          <TableRow key={project._id}>
+          <TableRow className="hover:cursor-pointer" key={project._id} href={`/projects/${project._id}`}>
             <TableCell>{project.title}</TableCell>
             <TableCell>{project.description}</TableCell>
             <TableCell>{project.captionLimit}</TableCell>
@@ -64,7 +64,7 @@ export default function ProjectsTable() {
             <TableCell align="center">
               <div className="relative flex justify-center items-center gap-2">
                 <Tooltip className="text-background bg-foreground" content="Details">
-                  <span className="text-lg text-default-400 cursor-pointer active:opacity-50">
+                  <span onClick={() => {window.location.href = `/projects/${project._id}`}} className="text-lg text-default-400 cursor-pointer active:opacity-50">
                     <EyeIcon />
                   </span>
                 </Tooltip>
