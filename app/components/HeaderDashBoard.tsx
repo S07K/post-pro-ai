@@ -13,9 +13,9 @@ import {
   Checkbox,
   Textarea,
 } from "@nextui-org/react";
-import Header from "../../components/Header"
+import Header from "./Header"
 // import { SearchIcon } from "./SearchIcon";
-import { AddIcon } from "../../icons/AddIcon";
+import { AddIcon } from "../icons/AddIcon";
 import axios from "axios";
 
 export default function HeaderDashBoard() {

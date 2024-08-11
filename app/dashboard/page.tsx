@@ -1,4 +1,4 @@
-import Header from "./components/HeaderDashBoard";
+import Header from "../components/HeaderDashBoard";
 import Container from "./components/Container";
 import CardsContainer from "./components/CardsContainer";
 import Analytics from "./components/Analytics";

@@ -72,7 +72,7 @@ const NewProject: React.FC<NewProjectProps> = ({ params }) => {
       .get(`/api/projects/${projectId}`)
       .then((response) => {
         // console.log(response.data);
-        if (response.data.length > 0) {
+        if (response.data) {
           setProject(response.data);
           // toast.success("Project added successfully");
         } else {
@@ -89,7 +89,7 @@ const NewProject: React.FC<NewProjectProps> = ({ params }) => {
     await axios
       .get(`/api/post/${projectId}`)
       .then((response) => {
-        console.log(response.data);
+        // console.log(response.data);
         if (response.data) {
           setPosts(response.data);
           // toast.success("Project added successfully");
