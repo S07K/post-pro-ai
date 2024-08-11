@@ -87,9 +87,9 @@ export default function PostCard({ cardDetails, fullView, isClickable = true }: 
                 <Button className="text-default-800 post-pro bg-primary-100" variant="light" onPress={onClose}>
                   Close
                 </Button>
-                <Button className="post-pro bg-primary-500 text-default-50" onPress={onClose}>
+                {/* <Button className="post-pro bg-primary-500 text-default-50" onPress={onClose}>
                   Edit
-                </Button>
+                </Button> */}
               </ModalFooter>
             </>
           )}

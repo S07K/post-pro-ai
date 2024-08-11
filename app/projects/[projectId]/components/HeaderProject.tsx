@@ -24,7 +24,7 @@ import { HeartIcon } from "@/app/icons/HeartIcon";
 import { CommentIcon } from "@/app/icons/CommentIcon";
 import { ShareIcon } from "@/app/icons/ShareIcon";
 
-const HeaderProject: React.FC<any> = ({ project }: any) => {
+const HeaderProject: React.FC<any> = ({ projectId, project }: any) => {
   const initialPostValues = {
     prompt: "",
     caption: "",
@@ -35,6 +35,7 @@ const HeaderProject: React.FC<any> = ({ project }: any) => {
   const [generatingImage, setGeneratingImage] = React.useState(false);
   const [imageURL, setImageURL] = React.useState("");
   const [isLoading, setLoading] = React.useState(false);
+  const [isPosting, setPosting] = React.useState(false);
   const [onCaptionView, setOnCaptionView] = React.useState(false);
   const handleChange = (event: any) => {
     setPost({
@@ -52,6 +53,44 @@ const HeaderProject: React.FC<any> = ({ project }: any) => {
     // a.click();
     // document.body.removeChild(a);
   };
+
+  const submitPost = async () => {
+    setPosting(true)
+    // console.log('Post: ', post)
+    const payload = {
+      projectId: projectId,
+      image: imageURL,
+      caption: post.caption,
+      hashtags: '',
+    }
+    axios
+    .post("/api/post", payload)
+    .then((response) => {
+      if (response?.data?.status === "success") {
+        onClose();
+        setPost(initialPostValues);
+        setImageCreated(false);
+        setGeneratingImage(false);
+        setImageURL("");
+        // console.log("Posted successfully: ", response?.data);
+        setPosting(false);
+        toast.success("Post uploaded successfully");
+        setTimeout(() => {
+          window.location.reload();
+        }, 1000);
+      } else {
+        console.error("Error in posting: ", response?.data?.message);
+        setPosting(false);
+
+        toast.error("Error in posting");
+      }
+    })
+    .catch((error) => {
+      console.error("Error in posting: ", error);
+      setPosting(false);
+      toast.error("Error in posting");
+    });
+  }
 
   const onSubmit = async () => {
     setLoading(true);
@@ -82,18 +121,18 @@ const HeaderProject: React.FC<any> = ({ project }: any) => {
           //   }
           // }, 2000);
         } else {
-          console.error("Error in creating project: ", response?.data?.message);
+          console.error("Error in creating post: ", response?.data?.message);
           setLoading(false);
           setImageCreated(false);
 
-          toast.error("Error in creating project");
+          toast.error("Error in creating post");
         }
       })
       .catch((error) => {
-        console.error("Error in creating project: ", error);
+        console.error("Error in creating post: ", error);
         setLoading(false);
         setImageCreated(false);
-        toast.error("Error in creating project");
+        toast.error("Error in creating post");
       });
   };
   return (
@@ -109,6 +148,7 @@ const HeaderProject: React.FC<any> = ({ project }: any) => {
         isOpen={isOpen}
         onOpenChange={onOpenChange}
         onClose={() => {
+          console.log('clossing....')
           setPost(initialPostValues);
           setImageCreated(false);
           setGeneratingImage(false);
@@ -231,9 +271,8 @@ const HeaderProject: React.FC<any> = ({ project }: any) => {
                   onCaptionView ?
                   <Button
                     className="post-pro bg-primary-500 text-default-50"
-                    onPress={() => {
-                      // Submitpost(false)
-                    }}
+                    onPress={submitPost}
+                    isLoading={isPosting}
                   >
                     Post
                   </Button> :

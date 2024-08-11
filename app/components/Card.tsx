@@ -62,9 +62,9 @@ export default function PostCard({ cardDetails, fullView, isClickable = true }: 
         </CardBody>
         <CardFooter className="flex flex-col items-start pt-0">
           <div className="flex">
-            <PostOption icon={<HeartIcon />} count={cardDetails.likes} />
-            <PostOption icon={<CommentIcon />} count={cardDetails.comments} />
-            <PostOption icon={<ShareIcon />} count={cardDetails.shares} />
+            <PostOption icon={<HeartIcon />} count={cardDetails.likes || 0} />
+            <PostOption icon={<CommentIcon />} count={cardDetails.comments || 0} />
+            <PostOption icon={<ShareIcon />} count={cardDetails.shares || 0} />
           </div>
           <small className={`text-default-800 webkit-box ${!fullView ? 'webkit-line-clamp-2' : ''} webkit-box-orient-vertical overflow-hidden`}>
             {cardDetails.caption}
@@ -87,9 +87,9 @@ export default function PostCard({ cardDetails, fullView, isClickable = true }: 
                 <Button className="text-default-800 post-pro bg-primary-100" variant="light" onPress={onClose}>
                   Close
                 </Button>
-                <Button className="post-pro bg-primary-500 text-default-50" onPress={onClose}>
+                {/* <Button className="post-pro bg-primary-500 text-default-50" onPress={onClose}>
                   Edit
-                </Button>
+                </Button> */}
               </ModalFooter>
             </>
           )}

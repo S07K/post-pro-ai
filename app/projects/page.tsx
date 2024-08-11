@@ -1,36 +1,31 @@
-import React from 'react';
-import Header from '../components/Header';
-
-interface Projects {
-    id: number;
-    name: string;
-    description: string;
-}
-
-const projects: Projects[] = [
-    { id: 1, name: 'Project 1', description: 'Description of Project 1' },
-    { id: 2, name: 'Project 2', description: 'Description of Project 2' },
-    { id: 3, name: 'Project 3', description: 'Description of Project 3' },
-    // Add more projects here
-];
+"use client";
+import React from "react";
+import Header from "../components/Header";
+import ProjectsTable from "./components/ProjectsTable";
 
 const Projects: React.FC = () => {
-    return (
-        <>
-            <Header></Header>
-            <div className="text-default-800">
-                <h1>Projects</h1>
-                <ul>
-                    {projects.map((project) => (
-                        <li key={project.id}>
-                            <h3>{project.name}</h3>
-                            <p>{project.description}</p>
-                        </li>
-                    ))}
-                </ul>
+  return (
+    <>
+      <Header></Header>
+      <section
+        className={`flex flex-col items-center justify-center gap-4 pb-10 text-default-800`}
+      >
+        <div className="flex flex-col max-w-[1440px] w-full px-6">
+          <div className="pt-10">
+            <h1 className="text-4xl">Projects</h1>
+            {/* <p>Project ID: {projectId}</p> */}
+            <p className="text-default-500 pt-2">Manage all of your projects here</p>
+          </div>
+          <div>
+            {/* <h2 className="text-2xl pt-10">Posts</h2> */}
+            <div className="flex flex-wrap justify-center sm:justify-start gap-4 pt-10">
+              <ProjectsTable />
             </div>
-        </>
-    );
+          </div>
+        </div>
+      </section>
+    </>
+  );
 };
 
 export default Projects;

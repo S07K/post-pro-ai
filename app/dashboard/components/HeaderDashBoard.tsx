@@ -22,8 +22,8 @@ export default function HeaderDashBoard() {
   const initialProjectValues = {
     title: "",
     description: "",
-    captionLimit: '2',
-    postLimit: '2',
+    captionLimit: '25',
+    postLimit: '5',
     openAIKey: "",
     hashtags: true,
   };
@@ -34,12 +34,17 @@ export default function HeaderDashBoard() {
   const handleChange = (event: any) => {
     setProject({
       ...project,
-      [event.target.name]: event.target.value,
+      [event.target.name]: event.target.type != "checkbox" ? event.target.value : event.target.checked,
     });
   };
 
   const onSubmit = async () => {
     setLoading(true);
+    if(Number(project.captionLimit) < 0 || Number(project.postLimit) < 1) {
+      setLoading(false);
+      toast.error("Please enter valid values for caption limit and post limit");
+      return;
+    }
     if(!project.title || !project.openAIKey) {
       setLoading(false);
       toast.error("Please fill all the required fields");
@@ -132,8 +137,8 @@ export default function HeaderDashBoard() {
                     <Input
                       name="captionLimit"
                       value={project.captionLimit}
-                      min={2}
-                      max={10}
+                      min={0}
+                      max={250}
                       onChange={handleChange}
                       type="number"
                       variant={"underlined"}
@@ -143,7 +148,7 @@ export default function HeaderDashBoard() {
                     <Input
                       name="postLimit"
                       value={project.postLimit}
-                      min={2}
+                      min={1}
                       max={10}
                       onChange={handleChange}
                       type="number"
