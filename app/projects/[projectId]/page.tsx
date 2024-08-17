@@ -4,8 +4,9 @@ import React, { useEffect, useState } from "react";
 import toast, { Toaster } from "react-hot-toast";
 import PostCard from "@/app/components/Card";
 import HeaderProject from "./components/HeaderProject";
-import { Button } from "@nextui-org/react";
+import { Button, Link } from "@nextui-org/react";
 import { PlusIcon } from "@/app/icons/PlusIcon";
+import { ArrowLeftIcon } from "@/app/icons/ArrowLeftIcon";
 
 interface NewProjectProps {
   params: any;
@@ -114,7 +115,10 @@ const NewProject: React.FC<NewProjectProps> = ({ params }) => {
       >
         <div className="flex flex-col max-w-[1440px] w-full px-6">
           <div className="pt-10">
-            <h1 className="text-4xl">{project.title}</h1>
+            <div className="flex gap-5">
+              <Link href="/projects" className="text-default-500"><ArrowLeftIcon className="text-default-800" /></Link>
+              <h1 className="text-4xl">{project.title}</h1>
+            </div>
             {/* <p>Project ID: {projectId}</p> */}
             <p className="text-default-500 pt-2">{project.description}</p>
           </div>
@@ -129,13 +133,13 @@ const NewProject: React.FC<NewProjectProps> = ({ params }) => {
             ) : (
               <div className="h-[300px] flex flex-col flex-wrap justify-center items-center gap-4 pt-10 border-1 rounded-md mt-5">
                 <p>No post in the project yet</p>
-                <Button
+                {/* <Button
                   className="bg-foreground text-background"
                   endContent={<PlusIcon />}
                   size="md"
                 >
                   Create first post
-                </Button>
+                </Button> */}
               </div>
             )}
           </div>
