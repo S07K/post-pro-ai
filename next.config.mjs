@@ -3,8 +3,15 @@ const nextConfig = {
     images: {
         remotePatterns: [
           {
+            protocol: 'http',
+            hostname: 'localhost',
+            port: '5001',
+            // pathname: '/account123/**',
+          },
+          // add production server url
+          {
             protocol: 'https',
-            hostname: 'oaidalleapiprodscus.blob.core.windows.net',
+            hostname: 'localhost',
             port: '',
             // pathname: '/account123/**',
           },

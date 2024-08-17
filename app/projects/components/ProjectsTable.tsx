@@ -46,7 +46,7 @@ export default function ProjectsTable() {
       </TableHeader>
       <TableBody emptyContent={"No rows to display."} isLoading={isLoading}>
         {projects.map((project: any, index: number) => (
-          <TableRow className="hover:cursor-pointer" key={project._id} href={`/projects/${project._id}`}>
+          <TableRow key={project._id} className="hover:cursor-pointer" href={`/projects/${project._id}`}>
             <TableCell>{project.title}</TableCell>
             <TableCell>{project.description}</TableCell>
             <TableCell>{project.captionLimit}</TableCell>

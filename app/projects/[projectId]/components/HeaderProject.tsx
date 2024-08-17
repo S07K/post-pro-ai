@@ -23,6 +23,7 @@ import PostOption from "@/app/components/PostOption";
 import { HeartIcon } from "@/app/icons/HeartIcon";
 import { CommentIcon } from "@/app/icons/CommentIcon";
 import { ShareIcon } from "@/app/icons/ShareIcon";
+import { ENDPOINT } from "@/app/lib/utils";
 
 const HeaderProject: React.FC<any> = ({ projectId, project }: any) => {
   const initialPostValues = {
@@ -56,7 +57,6 @@ const HeaderProject: React.FC<any> = ({ projectId, project }: any) => {
 
   const submitPost = async () => {
     setPosting(true)
-    // console.log('Post: ', post)
     const payload = {
       projectId: projectId,
       image: imageURL,
@@ -72,7 +72,6 @@ const HeaderProject: React.FC<any> = ({ projectId, project }: any) => {
         setImageCreated(false);
         setGeneratingImage(false);
         setImageURL("");
-        // console.log("Posted successfully: ", response?.data);
         setPosting(false);
         toast.success("Post uploaded successfully");
         setTimeout(() => {
@@ -104,22 +103,13 @@ const HeaderProject: React.FC<any> = ({ projectId, project }: any) => {
       return;
     }
     await axios
-      .post("/api/openai/post", { ...post, openAIKey: project?.openAIKey })
+      .post("/api/openai/post", { ...post, openAIKey: project?.openAIKey, projectId })
       .then((response) => {
         if (response?.data?.status === "success") {
-          // onClose();
-          // console.log("Post created successfully: ", response?.data);
-          // setPost(initialPostValues);
-          setImageURL(response?.data?.data?.url);
-          saveImage(response?.data?.data?.url);
+          console.log("Image URL: ", `${ENDPOINT}/${response?.data?.data?.url}`);
+          setImageURL(`${ENDPOINT}/${response?.data?.data?.url}`);
           setLoading(false);
           toast.success("Post created successfully");
-          // setTimeout(() => {
-          //   const projectId = response?.data?.project?._id;
-          //   if (projectId) {
-          //     window.location.href = `/projects/${projectId}`;
-          //   }
-          // }, 2000);
         } else {
           console.error("Error in creating post: ", response?.data?.message);
           setLoading(false);
