@@ -71,7 +71,7 @@ export default function PostCard({ cardDetails, fullView, isClickable = true }: 
           </small>
         </CardFooter>
       </Card>
-      <Modal isOpen={isOpen} onOpenChange={onOpenChange}>
+      <Modal backdrop={"blur"} isOpen={isOpen} onOpenChange={onOpenChange}>
         <ModalContent className="text-default-800">
           {(onClose) => (
             <>

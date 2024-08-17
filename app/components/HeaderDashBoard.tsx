@@ -105,7 +105,7 @@ export default function HeaderDashBoard() {
         >
           New
         </Button>
-        <Modal isOpen={isOpen} onOpenChange={onOpenChange} size="lg">
+        <Modal backdrop={"blur"} isOpen={isOpen} onOpenChange={onOpenChange} size="lg">
           <ModalContent className="text-default-800">
             {(onClose) => (
               <>
