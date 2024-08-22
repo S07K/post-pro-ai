@@ -1,6 +1,7 @@
 "use client";
-import React from "react";
-import { Toaster } from "react-hot-toast";
+import React, { useEffect } from "react";
+import axios from "axios";
+import toast, { Toaster } from "react-hot-toast";
 import {
   Navbar,
   NavbarBrand,
@@ -14,8 +15,59 @@ import {
 import Link from "next/link";
 
 export default function Header({children}: any) {
+
+  const [user, setUser] = React.useState<any>({});
+
+    const logOut = () => {
+      axios
+      .post("/api/logout")
+      .then((response) => {
+        // console.log(response);
+        if (response.data.status === "success") {
+          window.location.href = "/login";
+        } else {
+          if (response.data.status === "error") {
+            toast.error(response.data.message);
+          } else {
+            toast.error("An error occurred");
+          }
+        }
+      })
+      .catch((error) => {
+        console.error(error);
+        toast.error("An error occurred");
+      });
+    };
+
+    const fetchUser = async () => {
+      axios
+      .get("/api/user")
+      .then((response) => {
+        // console.log(response);
+        if (response.data.status === "success") {
+          // console.log('User data: ', response.data);
+          setUser(response.data.user);
+        } else {
+          if (response.data.status === "error") {
+            toast.error(response.data.message);
+          } else {
+            toast.error("An error occurred");
+          }
+        }
+      })
+      .catch((error) => {
+        console.error(error);
+        toast.error("An error occurred");
+      });
+    }
+
+    useEffect(() => {
+      fetchUser();
+    }, []);
+
     return (
       <>
+        <Toaster />
         <Navbar className="bg-[#000]">
           <NavbarContent justify="start">
             <NavbarBrand className="mr-4">
@@ -50,15 +102,18 @@ export default function Header({children}: any) {
                 />
               </DropdownTrigger>
               <DropdownMenu aria-label="User Actions">
-                <DropdownItem textValue="Profile" key="profile" className="h-14 gap-2">
-                  <p className="font-bold">Signed in as</p>
-                  <p className="font-bold">@tonyreichert</p>
-                </DropdownItem>
+                {
+                  user.email &&
+                  <DropdownItem textValue="Profile" key="profile" className="h-14 gap-2">
+                    <p className="font-bold">Signed in as</p>
+                    <p className="font-bold">{user.email}</p>
+                  </DropdownItem>
+                }
                 <DropdownItem textValue="Settings" key="settings">Settings</DropdownItem>
                 <DropdownItem textValue="Projects" key="team_settings" href="/projects">Projects</DropdownItem>
                 <DropdownItem textValue="Analytics" key="analytics" href="/#analytics">Analytics</DropdownItem>
                 <DropdownItem textValue="Help & Feedback" key="help_and_feedback">Help & Feedback</DropdownItem>
-                <DropdownItem textValue="Log Out" key="logout" color="danger">
+                <DropdownItem textValue="Log Out" key="logout" color="danger" onClick={logOut}>
                   Log Out
                 </DropdownItem>
               </DropdownMenu>

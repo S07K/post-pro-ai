@@ -106,7 +106,7 @@ const HeaderProject: React.FC<any> = ({ projectId, project }: any) => {
       .post("/api/openai/post", { ...post, openAIKey: project?.openAIKey, projectId })
       .then((response) => {
         if (response?.data?.status === "success") {
-          console.log("Image URL: ", `${ENDPOINT}/${response?.data?.data?.url}`);
+          // console.log("Image URL: ", `${ENDPOINT}/${response?.data?.data?.url}`);
           setImageURL(`${ENDPOINT}/${response?.data?.data?.url}`);
           setLoading(false);
           toast.success("Post created successfully");
@@ -138,7 +138,6 @@ const HeaderProject: React.FC<any> = ({ projectId, project }: any) => {
         isOpen={isOpen}
         onOpenChange={onOpenChange}
         onClose={() => {
-          console.log('clossing....')
           setPost(initialPostValues);
           setImageCreated(false);
           setGeneratingImage(false);

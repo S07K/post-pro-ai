@@ -33,9 +33,11 @@ export default function ProjectsTable() {
     axios
       .get("/api/projects")
       .then((response) => {
-        // console.log("response.data: ", response.data);
-        setProjects(response.data);
-        setTableLoading(false);
+        if(response.data.status === "success") {
+          // console.log("response.data: ", response.data);
+          setProjects(response.data.projects);
+          setTableLoading(false);
+        }
       })
       .catch((error) => {
         setTableLoading(false);
