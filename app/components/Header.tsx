@@ -49,19 +49,19 @@ export default function Header({children}: any) {
           setUser(response.data.user);
         } else {
           if (response.data.status === "error") {
-            toast.error(<>
+            toast.error(<div>
             <h1 className="font-bold">Error</h1>
             <p>{response.data.message}</p>
             <p>Logging Out...</p>
-            </>);
+            </div>);
             setTimeout(() => {
               logOut();
             }, 3000);
           } else {
-            toast.error(<>
+            toast.error(<div>
               <h1 className="font-bold">Error</h1>
               <p>Logging Out...</p>
-              </>);
+              </div>);
               setTimeout(() => {
                 logOut();
               }, 3000);
