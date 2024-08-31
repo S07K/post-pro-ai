@@ -22,7 +22,7 @@ export default function Header({children}: any) {
       axios
       .post("/api/logout")
       .then((response) => {
-        // console.log(response);
+        console.log(response);
         if (response.data.status === "success") {
           window.location.href = "/login";
         } else {
@@ -49,9 +49,22 @@ export default function Header({children}: any) {
           setUser(response.data.user);
         } else {
           if (response.data.status === "error") {
-            toast.error(response.data.message);
+            toast.error(<>
+            <h1 className="font-bold">Error</h1>
+            <p>{response.data.message}</p>
+            <p>Logging Out...</p>
+            </>);
+            setTimeout(() => {
+              logOut();
+            }, 3000);
           } else {
-            toast.error("An error occurred");
+            toast.error(<>
+              <h1 className="font-bold">Error</h1>
+              <p>Logging Out...</p>
+              </>);
+              setTimeout(() => {
+                logOut();
+              }, 3000);
           }
         }
       })
