@@ -6,13 +6,17 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "ngrok": "ngrok http 3000"
   },
   "dependencies": {
     "@nextui-org/react": "^2.4.6",
+    "@types/facebook-js-sdk": "^3.3.12",
     "axios": "^1.7.3",
+    "facebook-js-sdk": "^0.3.4",
     "framer-motion": "^11.3.21",
     "next": "14.2.5",
+    "ngrok": "^5.0.0-beta.2",
     "react": "^18",
     "react-countup": "^6.5.3",
     "react-dom": "^18",
