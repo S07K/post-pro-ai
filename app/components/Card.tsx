@@ -51,13 +51,13 @@ export default function PostCard({ cardDetails, fullView, isClickable = true }: 
               </div>
             </div>
           </CardHeader> */}
-        <CardBody className="overflow-visible py-2">
+        <CardBody className="overflow-visible py-2 max-h-[300px]">
           <Image
             alt="Card background"
             className="object-cover rounded-xl"
             src={cardDetails.image}
-            width={300}
-            height={200}
+            width={!fullView ? 300 : "100%"}
+            height={!fullView ? 200 : "auto"}
           />
         </CardBody>
         <CardFooter className="flex flex-col items-start pt-0">

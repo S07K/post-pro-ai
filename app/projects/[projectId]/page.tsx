@@ -137,7 +137,7 @@ const NewProject: React.FC<NewProjectProps> = ({ params }) => {
                   </div>
                   <div>
                     {
-                      status.facebook ?
+                      status?.facebook ?
                       <div id="status" className="text-default-900">
                         <Button className="post-pro bg-[#1a77f2] text-default-50" onPress={() => {
                           removeConnection("facebook");
@@ -151,11 +151,13 @@ const NewProject: React.FC<NewProjectProps> = ({ params }) => {
                           window.FB.login(
                             function (response: any) {
                               if (response.authResponse && response.status === "connected") {
+                                console.log("Welcome! Fetching your information.... ", response);
                                 setUserAccess({
                                   token: response.authResponse.accessToken,
                                   connection: response.authResponse.graphDomain,
                                 });
                                 FB.api("/me", function (response: any) {
+                                  console.log("Successful login for: ", response);
                                   if(response.error) {
                                     console.log("Error: ", response.error);
                                     return;

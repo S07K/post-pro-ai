@@ -135,6 +135,7 @@ const HeaderProject: React.FC<any> = ({ projectId, project }: any) => {
         New post
       </Button>
       <Modal
+        backdrop={"blur"}
         isOpen={isOpen}
         onOpenChange={onOpenChange}
         onClose={() => {
