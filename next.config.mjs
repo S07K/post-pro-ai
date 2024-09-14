@@ -11,7 +11,7 @@ const nextConfig = {
           // add production server url
           {
             protocol: 'https',
-            hostname: 'localhost',
+            hostname: 'post-pro-ai-backend.vercel.app/',
             port: '',
             // pathname: '/account123/**',
           },
