@@ -111,7 +111,7 @@ export default function Header({children}: any) {
                 <Avatar
                   className="hover:cursor-pointer"
                   isBordered
-                  src="https://i.pravatar.cc/150?u=a04258a2462d826712d"
+                  // src="https://i.pravatar.cc/150?u=a04258a2462d826712d"
                 />
               </DropdownTrigger>
               <DropdownMenu aria-label="User Actions">
@@ -122,10 +122,10 @@ export default function Header({children}: any) {
                     <p className="font-bold">{user.email}</p>
                   </DropdownItem>
                 }
-                <DropdownItem textValue="Settings" key="settings">Settings</DropdownItem>
+                {/* <DropdownItem textValue="Settings" key="settings">Settings</DropdownItem> */}
                 <DropdownItem textValue="Projects" key="team_settings" href="/projects">Projects</DropdownItem>
                 <DropdownItem textValue="Analytics" key="analytics" href="/#analytics">Analytics</DropdownItem>
-                <DropdownItem textValue="Help & Feedback" key="help_and_feedback">Help & Feedback</DropdownItem>
+                {/* <DropdownItem textValue="Help & Feedback" key="help_and_feedback">Help & Feedback</DropdownItem> */}
                 <DropdownItem textValue="Log Out" key="logout" color="danger" onClick={logOut}>
                   Log Out
                 </DropdownItem>

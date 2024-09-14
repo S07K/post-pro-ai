@@ -21,7 +21,7 @@ const Projects: React.FC = () => {
           </div>
           <div>
             {/* <h2 className="text-2xl pt-10">Posts</h2> */}
-            <div className="flex flex-wrap justify-center sm:justify-start gap-4 pt-10">
+            <div className="flex flex-wrap justify-center sm:justify-start gap-4 pt-10 overflow-auto">
               <ProjectsTable />
             </div>
           </div>

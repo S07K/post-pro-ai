@@ -126,7 +126,7 @@ export default function ProjectsTable() {
       return;
     }
     await axios
-      .put(`/api/projects/${editProject._id}`, editProject)
+      .put(`/api/projects/${editProject.id}`, editProject)
       .then((response) => {
         if (response?.data?.status === "success") {
           onClose();

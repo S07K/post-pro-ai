@@ -126,14 +126,14 @@ const NewProject: React.FC<NewProjectProps> = ({ params }) => {
           <section
             className={`flex flex-col items-center justify-center gap-4 pb-10 text-default-800`}
           >
-            <div className="flex flex-col max-w-[1440px] w-full px-6">
+            <div className="flex flex-col max-w-[1440px] w-full px-3 md:px-6">
               <div className="pt-10">
                 <div className="flex justify-between items-center">
-                  <div className="flex gap-5">
+                  <div className="flex gap-2 md:gap-5 flex-wrap">
                     <Link href="/projects" className="text-default-500">
                       <ArrowLeftIcon className="text-default-800" />
                     </Link>
-                    <h1 className="text-4xl">{project.title}</h1>
+                    <h1 className="text-lg md:text-2xl">{project.title}</h1>
                   </div>
                   <div>
                     {
@@ -185,13 +185,13 @@ const NewProject: React.FC<NewProjectProps> = ({ params }) => {
                           );
                         }}
                       >
-                        <FacebookIcon /> Connect to Instagram
+                        <FacebookIcon /> Connect Instagram
                       </Button>
                     }
                   </div>
                 </div>
                 {/* <p>Project ID: {projectId}</p> */}
-                <p className="text-default-500 pt-2">{project.description}</p>
+                <p className="text-default-500 pt-2 text-sm md:text-medium">{project.description}</p>
               </div>
               <div>
                 <h2 className="text-2xl pt-10">Posts</h2>
