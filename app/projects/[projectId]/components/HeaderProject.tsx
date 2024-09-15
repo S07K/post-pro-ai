@@ -23,7 +23,6 @@ import PostOption from "@/app/components/PostOption";
 import { HeartIcon } from "@/app/icons/HeartIcon";
 import { CommentIcon } from "@/app/icons/CommentIcon";
 import { ShareIcon } from "@/app/icons/ShareIcon";
-import { ENDPOINT } from "@/app/lib/utils";
 
 const HeaderProject: React.FC<any> = ({ projectId, project }: any) => {
   const initialPostValues = {
@@ -106,8 +105,8 @@ const HeaderProject: React.FC<any> = ({ projectId, project }: any) => {
       .post("/api/openai/post", { ...post, openAIKey: project?.openAIKey, projectId })
       .then((response) => {
         if (response?.data?.status === "success") {
-          // console.log("Image URL: ", `${ENDPOINT}/${response?.data?.data?.url}`);
-          setImageURL(`${ENDPOINT}/${response?.data?.data?.url}`);
+          // console.log("Image URL: ", `${response?.data?.data?.url}`);
+          setImageURL(`${response?.data?.data?.url}`);
           setLoading(false);
           toast.success("Post created successfully");
         } else {

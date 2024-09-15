@@ -11,7 +11,7 @@ const nextConfig = {
           // add production server url
           {
             protocol: 'https',
-            hostname: 'post-pro-ai-backend.vercel.app/',
+            hostname: 'firebasestorage.googleapis.com',
             port: '',
             // pathname: '/account123/**',
           },
