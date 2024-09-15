@@ -11,6 +11,8 @@ import {
   Dropdown,
   DropdownMenu,
   Avatar,
+  Badge,
+  Tooltip
 } from "@nextui-org/react";
 import Link from "next/link";
 
@@ -85,7 +87,11 @@ export default function Header({children}: any) {
           <NavbarContent justify="start">
             <NavbarBrand className="mr-4">
               <Link href="/">
-                <p className="font-display font-semibold text-2xl">PostProAI</p>
+                <Tooltip content="This app is a beta version, some features might not work properly." className="w-[200px] text-default-900 text-center">
+                  <Badge content="" color="warning" size="sm" className="right-[-2px] border-none">
+                    <p className="font-display font-semibold text-2xl">PostProAI</p>
+                  </Badge>
+                </Tooltip>
               </Link>
             </NavbarBrand>
           </NavbarContent>

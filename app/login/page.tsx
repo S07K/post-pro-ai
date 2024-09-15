@@ -1,6 +1,6 @@
 "use client";
 import React, { useState } from "react";
-import { Button, Checkbox, Input, Link } from "@nextui-org/react";
+import { Button, Chip, Input, Link } from "@nextui-org/react";
 import loginImg from "@/app/assets/images/loginImg.png";
 import Image from "next/image";
 import { LockIcon } from "../icons/LockIcon";
@@ -78,10 +78,15 @@ const Login: React.FC = (props) => {
         </div>
         <div className="w-full md:w-[40%] flex flex-col items-center justify-center p-4 bg-default-50 z-10">
           <div className="w-full flex flex-col gap-4 max-w-[440px]">
-            <Link href="/">
+            <Link href="/" className="flex items-center">
               <p className="font-display font-semibold text-4xl text-default-900">
                 PostProAI
               </p>
+              <Chip color="warning" variant="dot" classNames={
+                {
+                  base: "ml-2",
+                }
+              }>Beta</Chip>
             </Link>
             <p className="font-display font-normal text-md text-default-600">
               Welcome back! Please login to your account.

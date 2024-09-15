@@ -10,7 +10,7 @@ const Dashboard: React.FC = () => {
             <Container title="History" bg={"linear-gradient(var(--color-dark), var(--color-500))"} font={"post-pro text-default-50"}>
                 <CardsContainer />
             </Container>
-            <Container title="Analytics">
+            <Container title="Analytics (coming soon)">
                 <Analytics />
             </Container>
         </>
