@@ -2,16 +2,21 @@ import { withAuth } from "next-auth/middleware";
 import { NextResponse } from "next/server";
 
 export default withAuth(
-  function middleware(req) {
-    if (req.nextUrl.pathname.startsWith("/api") && !req.nextauth.token) {
-      return NextResponse.json({ status: "error", message: "Authentication required" }, { status: 401 });
-    }
+  function middleware() {
     return NextResponse.next();
   },
   {
     pages: { signIn: "/login" },
     callbacks: {
-      authorized: ({ token }) => !!token,
+      authorized: ({ req, token }) => {
+        // For API routes, let the request through even without a session so the
+        // route handler can return a proper 401 JSON body instead of an HTML
+        // redirect (which is what withAuth does by default on failure).
+        if (req.nextUrl.pathname.startsWith("/api")) {
+          return true;
+        }
+        return !!token;
+      },
     },
   }
 );
