@@ -4,6 +4,7 @@ import Post from "@/lib/db/models/post";
 import { createPostSchema } from "@/lib/validation/post";
 import { publishPost } from "@/lib/scheduler";
 import { requireUserId } from "@/lib/api/session";
+import { toPostDTO } from "@/lib/api/serializers";
 import { ok, unauthorized, forbidden, notFound, validationError, serverError } from "@/lib/api/respond";
 
 export async function POST(req: Request) {
@@ -39,7 +40,7 @@ export async function POST(req: Request) {
       await publishPost(post, project);
     }
 
-    return ok({ status: "success", post });
+    return ok({ status: "success", post: toPostDTO(post) });
   } catch (error) {
     return serverError(error, "Failed to create post");
   }

@@ -1,103 +1,52 @@
-import React from "react";
+"use client";
+import React, { useEffect, useState } from "react";
+import toast from "react-hot-toast";
+import { Spinner } from "@nextui-org/react";
 import InfoCard from "./InfoCard";
 import { GraphIcon } from "../../icons/GraphIcon";
 import { FollowersIcon } from "../../icons/FollowersIcon";
 import PostViewsChart from "./AreaChartContainer";
 import { LikesIcon } from "../../icons/LikesIcon";
+import { getAnalytics } from "@/lib/api/client";
+import type { AnalyticsDTO } from "@/types";
 
-interface AnalyticsProps {
-  // Define the props for the Analytics component here
-}
+const Analytics: React.FC = () => {
+  const [analytics, setAnalytics] = useState<AnalyticsDTO | null>(null);
 
-const Analytics: React.FC<AnalyticsProps> = () => {
-  const data1 = [
-    {
-      "name": "Page A",
-      "value": 4000,
-    },
-    {
-      "name": "Page B",
-      "value": 3000,
-    },
-    {
-      "name": "Page C",
-      "value": 2000,
-    },
-    {
-      "name": "Page D",
-      "value": 2780,
-    },
-    {
-      "name": "Page E",
-      "value": 1890,
-    },
-    {
-      "name": "Page F",
-      "value": 2390,
-    },
-    {
-      "name": "Page G",
-      "value": 3490,
-    }
-  ]
+  useEffect(() => {
+    getAnalytics()
+      .then(setAnalytics)
+      .catch(() => toast.error("Failed to load analytics"));
+  }, []);
 
-  const data2 = [
-    {
-      "name": "Page A",
-      "value": 2400,
-    },
-    {
-      "name": "Page B",
-      "value": 1398,
-    },
-    {
-      "name": "Page C",
-      "value": 9800,
-    },
-    {
-      "name": "Page D",
-      "value": 3908,
-    },
-    {
-      "name": "Page E",
-      "value": 4800,
-    },
-    {
-      "name": "Page F",
-      "value": 3800,
-    },
-    {
-      "name": "Page G",
-      "value": 4300,
-    }
-  ]
+  if (!analytics) {
+    return (
+      <div className="flex justify-center pt-4">
+        <Spinner />
+      </div>
+    );
+  }
+
+  const postsPerWeekData = analytics.postsPerWeek.map((bucket) => ({ name: bucket.week, value: bucket.count }));
+  const byStatusData = [
+    { name: "Posted", value: analytics.byStatus.posted },
+    { name: "Scheduled", value: analytics.byStatus.scheduled },
+    { name: "Processing", value: analytics.byStatus.processing },
+    { name: "Draft", value: analytics.byStatus.draft },
+    { name: "Failed", value: analytics.byStatus.failed },
+  ];
+
   return (
     <>
       <section id="analytics" className="pt-4 flex gap-6 flex-col sm:flex-row">
-        <InfoCard
-          title="Total post views"
-          start={2000}
-          count={3041}
-          icon={<GraphIcon />}
-          bg="bg-[#80AF81]"
-        />
-        <InfoCard
-          title="Followers"
-          count={300}
-          icon={<FollowersIcon />}
-          bg="bg-[#6EACDA]"
-        />
-        <InfoCard
-          title="Average Likes"
-          count={433}
-          icon={<LikesIcon />}
-          bg="bg-[#EF5A6F]"
-        />
+        <InfoCard title="Total posts" count={analytics.totalPosts} icon={<GraphIcon />} bg="bg-[#80AF81]" />
+        <InfoCard title="Projects" count={analytics.totalProjects} icon={<FollowersIcon />} bg="bg-[#6EACDA]" />
+        <InfoCard title="Posted to Instagram" count={analytics.byStatus.posted} icon={<LikesIcon />} bg="bg-[#EF5A6F]" />
       </section>
       <section className="pt-10 flex gap-6 flex-col sm:flex-row">
         <div className="w-full flex flex-wrap gap-5">
-            <PostViewsChart data={data1} id="content-performance" title={"Content Performance"} chartColor={"#80AF81"} />
-            <PostViewsChart data={data2} id="followings-performance" title={"Audience"} chartColor={"#6EACDA"} />
+          <PostViewsChart data={postsPerWeekData} id="posts-per-week" title="Posts created (last 8 weeks)" chartColor="#80AF81" />
+          <PostViewsChart data={byStatusData} id="posts-by-status" title="Posts by status" chartColor="#6EACDA" />
         </div>
       </section>
     </>

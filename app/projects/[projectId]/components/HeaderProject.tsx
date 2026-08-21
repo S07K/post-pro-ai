@@ -1,6 +1,6 @@
+"use client";
 import Header from "@/app/components/Header";
 import { AddIcon } from "@/app/icons/AddIcon";
-import axios from "axios";
 import toast from "react-hot-toast";
 import MaskImage from "@/app/assets/images/Mask_IMG.svg";
 import {
@@ -16,208 +16,153 @@ import {
   CardBody,
   CardFooter,
   Skeleton,
+  Tabs,
+  Tab,
 } from "@nextui-org/react";
 import React from "react";
 import Image from "next/image";
-import PostOption from "@/app/components/PostOption";
-import { HeartIcon } from "@/app/icons/HeartIcon";
-import { CommentIcon } from "@/app/icons/CommentIcon";
-import { ShareIcon } from "@/app/icons/ShareIcon";
+import { generatePostImage, createPost } from "@/lib/api/client";
+import type { ProjectDTO } from "@/types";
 
-const HeaderProject: React.FC<any> = ({ projectId, project }: any) => {
-  const initialPostValues = {
-    prompt: "",
-    caption: "",
-  };
+const initialPostValues = { prompt: "", caption: "" };
+
+const HeaderProject: React.FC<{ projectId: string; project: ProjectDTO | null; onPostCreated: () => void }> = ({
+  projectId,
+  project,
+  onPostCreated,
+}) => {
   const { isOpen, onOpen, onOpenChange, onClose } = useDisclosure();
-  const [post, setPost] = React.useState<any>(initialPostValues);
+  const [post, setPost] = React.useState(initialPostValues);
   const [isImageCreated, setImageCreated] = React.useState(false);
-  const [generatingImage, setGeneratingImage] = React.useState(false);
   const [imageURL, setImageURL] = React.useState("");
   const [isLoading, setLoading] = React.useState(false);
   const [isPosting, setPosting] = React.useState(false);
   const [onCaptionView, setOnCaptionView] = React.useState(false);
-  const handleChange = (event: any) => {
-    setPost({
-      ...post,
-      [event.target.name]: event.target.value,
-    });
+  const [publishMode, setPublishMode] = React.useState<"now" | "schedule">("now");
+  const [scheduledAt, setScheduledAt] = React.useState("");
+
+  const resetForm = () => {
+    setPost(initialPostValues);
+    setImageCreated(false);
+    setImageURL("");
+    setOnCaptionView(false);
+    setPublishMode("now");
+    setScheduledAt("");
   };
 
-  const saveImage = async (url: string) => {
-    // const a = document.createElement("a");
-    // document.body.appendChild(a);
-    // a.href = url;
-    // a.download = "image.png";
-    // a.target = "_blank";
-    // a.click();
-    // document.body.removeChild(a);
+  const handleChange = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    setPost({ ...post, [event.target.name]: event.target.value });
   };
 
   const submitPost = async () => {
-    setPosting(true)
-    const payload = {
-      projectId: projectId,
-      image: imageURL,
-      caption: post.caption,
-      hashtags: '',
-    }
-    axios
-    .post("/api/post", payload)
-    .then((response) => {
-      if (response?.data?.status === "success") {
-        onClose();
-        setPost(initialPostValues);
-        setImageCreated(false);
-        setGeneratingImage(false);
-        setImageURL("");
-        setPosting(false);
-        toast.success("Post uploaded successfully");
-        setTimeout(() => {
-          window.location.reload();
-        }, 1000);
+    setPosting(true);
+    try {
+      const created = await createPost({
+        projectId,
+        image: imageURL,
+        caption: post.caption,
+        hashtags: "",
+        scheduledAt: publishMode === "schedule" && scheduledAt ? new Date(scheduledAt).toISOString() : undefined,
+      });
+      onClose();
+      resetForm();
+      onPostCreated();
+      if (created.status === "failed") {
+        toast.error(created.failureReason || "Post saved but could not be published");
+      } else if (created.status === "scheduled") {
+        toast.success("Post scheduled successfully");
       } else {
-        console.error("Error in posting: ", response?.data?.message);
-        setPosting(false);
-
-        toast.error("Error in posting");
+        toast.success("Post uploaded successfully");
       }
-    })
-    .catch((error) => {
-      console.error("Error in posting: ", error);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Error in posting");
+    } finally {
       setPosting(false);
-      toast.error("Error in posting");
-    });
-  }
+    }
+  };
 
   const onSubmit = async () => {
+    if (!post.prompt || post.prompt.length <= 10) return;
     setLoading(true);
     setImageCreated(true);
-
-    if (!post.prompt || !project?.openAIKey) {
-      setLoading(false);
+    try {
+      const url = await generatePostImage(post.prompt, projectId);
+      setImageURL(url);
+      toast.success("Image generated successfully");
+    } catch (error) {
       setImageCreated(false);
-
-      // toast.error("Please fill all the required fields");
-      return;
+      toast.error(error instanceof Error ? error.message : "Error generating image");
+    } finally {
+      setLoading(false);
     }
-    await axios
-      .post("/api/openai/post", { ...post, openAIKey: project?.openAIKey, projectId })
-      .then((response) => {
-        if (response?.data?.status === "success") {
-          // console.log("Image URL: ", `${response?.data?.data?.url}`);
-          setImageURL(`${response?.data?.data?.url}`);
-          setLoading(false);
-          toast.success("Post created successfully");
-        } else {
-          console.error("Error in creating post: ", response?.data?.message);
-          setLoading(false);
-          setImageCreated(false);
-
-          toast.error("Error in creating post");
-        }
-      })
-      .catch((error) => {
-        console.error("Error in creating post: ", error);
-        setLoading(false);
-        setImageCreated(false);
-        toast.error("Error in creating post");
-      });
   };
+
   return (
     <Header>
-      <Button
-        onPress={onOpen}
-        className="post-pro bg-default-50 text-md"
-        endContent={<AddIcon />}
-      >
+      <Button onPress={onOpen} className="post-pro bg-default-50 text-md" endContent={<AddIcon />}>
         New post
       </Button>
-      <Modal
-        backdrop={"blur"}
-        isOpen={isOpen}
-        onOpenChange={onOpenChange}
-        onClose={() => {
-          setPost(initialPostValues);
-          setImageCreated(false);
-          setGeneratingImage(false);
-          setImageURL("");
-        }}
-        size="lg"
-      >
+      <Modal backdrop="blur" isOpen={isOpen} onOpenChange={onOpenChange} onClose={resetForm} size="lg">
         <ModalContent className="text-default-800">
-          {(onClose) => (
+          {(onModalClose) => (
             <>
-              <ModalHeader className="flex flex-col gap-1">
-                Create New Post
-              </ModalHeader>
+              <ModalHeader className="flex flex-col gap-1">Create New Post</ModalHeader>
               <ModalBody>
                 {isImageCreated ? (
                   <div className="flex flex-col gap-10 justify-center items-center">
                     <Card className="py-1 w-[300px]">
                       <CardBody className="overflow-visible py-2">
-                        <Skeleton
-                          isLoaded={
-                            (imageURL ? true : false) && generatingImage
-                          }
-                          className="rounded-lg"
-                        >
+                        <Skeleton isLoaded={Boolean(imageURL)} className="rounded-lg">
                           <Image
-                            alt="Card background"
+                            alt="Generated post"
                             className="object-cover rounded-xl"
-                            src={imageURL ? imageURL : MaskImage}
-                            onLoad={() => setGeneratingImage(true)}
+                            src={imageURL || MaskImage}
                             width={300}
                             height={200}
                           />
                         </Skeleton>
                       </CardBody>
-                      <CardFooter className="flex flex-col items-start pt-0">
-                        <div className="flex">
-                          <PostOption icon={<HeartIcon />} count={0} />
-                          <PostOption icon={<CommentIcon />} count={0} />
-                          <PostOption icon={<ShareIcon />} count={0} />
-                        </div>
-                        {
-                          onCaptionView ? 
-                          <small
-                            className={`text-default-500 webkit-box webkit-box-orient-vertical overflow-hidden`}
-                          >
-                            {post.caption}
-                          </small> : <></>
-                        }
-                      </CardFooter>
+                      {onCaptionView ? (
+                        <CardFooter className="flex flex-col items-start pt-0">
+                          <small className="text-default-500 webkit-box webkit-box-orient-vertical overflow-hidden">{post.caption}</small>
+                        </CardFooter>
+                      ) : null}
                     </Card>
-                    {
-                      onCaptionView ? 
-                      <Textarea
-                        // validate={() => {
-                        //   if (post.caption.length > 250) {
-                        //     return "Caption should be less than 250 characters";
-                        //   }
-                        //   return 'Maximum characters allowed is 250';
-                        // }}
-                        max={250}
-                        maxLength={250}
-                        name="caption"
-                        value={post.caption}
-                        onChange={handleChange}
-                        variant={"underlined"}
-                        // label="Description"
-                        description="Enter caption for your post."
-                        labelPlacement="outside"
-                        placeholder="Enter post caption"
-                      /> : <></>
-                    }
+                    {onCaptionView ? (
+                      <>
+                        <Textarea
+                          maxLength={project?.captionLimit || 2200}
+                          name="caption"
+                          value={post.caption}
+                          onChange={handleChange}
+                          variant="underlined"
+                          description="Enter caption for your post."
+                          labelPlacement="outside"
+                          placeholder="Enter post caption"
+                        />
+                        <Tabs selectedKey={publishMode} onSelectionChange={(key) => setPublishMode(key as "now" | "schedule")} fullWidth>
+                          <Tab key="now" title="Publish now" />
+                          <Tab key="schedule" title="Schedule for later" />
+                        </Tabs>
+                        {publishMode === "schedule" ? (
+                          <input
+                            type="datetime-local"
+                            className="w-full border-b border-default-300 bg-transparent py-2 text-default-800 outline-none"
+                            min={new Date(Date.now() + 60_000).toISOString().slice(0, 16)}
+                            value={scheduledAt}
+                            onChange={(event) => setScheduledAt(event.target.value)}
+                          />
+                        ) : null}
+                      </>
+                    ) : null}
                   </div>
                 ) : (
                   <Textarea
                     name="prompt"
                     value={post.prompt}
                     onChange={handleChange}
-                    variant={"underlined"}
-                    // label="Description"
-                    description="Enter a promt for your post image."
+                    variant="underlined"
+                    description="Enter a prompt for your post image."
                     labelPlacement="outside"
                     placeholder="Enter post prompt"
                   />
@@ -229,13 +174,9 @@ const HeaderProject: React.FC<any> = ({ projectId, project }: any) => {
                     className="text-default-800 post-pro bg-primary-100"
                     variant="light"
                     onPress={() => {
-                      setPost({
-                        ...initialPostValues,
-                        prompt: post.prompt,
-                        caption: post.caption,
-                      })
-                      setImageCreated(false)
-                      setImageURL('')
+                      setPost({ ...initialPostValues, prompt: post.prompt, caption: post.caption });
+                      setImageCreated(false);
+                      setImageURL("");
                     }}
                     isLoading={isLoading}
                   >
@@ -246,44 +187,34 @@ const HeaderProject: React.FC<any> = ({ projectId, project }: any) => {
                     className="text-default-800 post-pro bg-primary-100"
                     variant="light"
                     onPress={() => {
-                      setPost(initialPostValues);
-                      setImageCreated(false);
-                      setGeneratingImage(false);
-                      setImageURL("");
-                      onClose();
+                      resetForm();
+                      onModalClose();
                     }}
                   >
                     Cancel
                   </Button>
                 )}
                 {isImageCreated ? (
-                  onCaptionView ?
-                  <Button
-                    className="post-pro bg-primary-500 text-default-50"
-                    onPress={submitPost}
-                    isLoading={isPosting}
-                  >
-                    Post
-                  </Button> :
-                  <Button
-                    className="post-pro bg-primary-500 text-default-50"
-                    onPress={() => {
-                      setOnCaptionView(true)
-                    }}
-                  >
-                    Write Caption
-                  </Button>
+                  onCaptionView ? (
+                    <Button
+                      className="post-pro bg-primary-500 text-default-50"
+                      onPress={submitPost}
+                      isLoading={isPosting}
+                      isDisabled={publishMode === "schedule" && !scheduledAt}
+                    >
+                      {publishMode === "schedule" ? "Schedule" : "Post"}
+                    </Button>
+                  ) : (
+                    <Button className="post-pro bg-primary-500 text-default-50" onPress={() => setOnCaptionView(true)} isDisabled={!imageURL}>
+                      Write Caption
+                    </Button>
+                  )
                 ) : (
                   <Button
                     className="post-pro bg-primary-500 text-default-50"
                     onPress={onSubmit}
                     isLoading={isLoading}
-                    isDisabled={
-                      post.prompt && post.prompt.length > 10 ? false : true
-                    }
-                    disabled={
-                      post.prompt && post.prompt.length > 10 ? false : true
-                    }
+                    isDisabled={!post.prompt || post.prompt.length <= 10}
                   >
                     Generate
                   </Button>

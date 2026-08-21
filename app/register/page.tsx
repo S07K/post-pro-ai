@@ -1,11 +1,11 @@
 "use client";
 import React, { useState } from "react";
-import { Button, Chip, Input, Link } from "@nextui-org/react";
+import { Button, Input, Link } from "@nextui-org/react";
 import loginImg from "@/app/assets/images/registerImg.png";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import axios from "axios";
 import toast, { Toaster } from "react-hot-toast";
+import { register } from "@/lib/api/client";
 
 const Register: React.FC = () => {
   const router = useRouter();
@@ -30,7 +30,7 @@ const Register: React.FC = () => {
     setConfirmPasswordChange(event.target.value);
   };
 
-  const handleSubmit = (event: React.FormEvent | React.MouseEvent) => {
+  const handleSubmit = async (event: React.FormEvent | React.MouseEvent) => {
     event.preventDefault();
     if (!email || !password || !confirmPassword) {
       setFormError("Please fill in all fields");
@@ -45,32 +45,19 @@ const Register: React.FC = () => {
       return;
     }
     setPasswordError("");
+    setFormError("");
     setIsRegistering(true);
-    axios
-      .post("/api/register", {
-        email,
-        password,
-      })
-      .then((response) => {
-        if (response.data.status === "success") {
-          toast.success("Account created successfully");
-          setTimeout(() => {
-            setIsRegistering(false);
-            router.push("/login");
-          }, 2000);
-        } else {
-          setIsRegistering(false);
-          if (response.data.status === "error") {
-            toast.error(response.data.message);
-          } else {
-            toast.error("An error occurred");
-          }
-        }
-      })
-      .catch((error) => {
+    try {
+      await register(email, password);
+      toast.success("Account created successfully");
+      setTimeout(() => {
         setIsRegistering(false);
-        console.error(error);
-      });
+        router.push("/login");
+      }, 2000);
+    } catch (error) {
+      setIsRegistering(false);
+      toast.error(error instanceof Error ? error.message : "An error occurred");
+    }
   };
 
   return (
@@ -95,11 +82,6 @@ const Register: React.FC = () => {
               <p className="font-display font-semibold text-4xl text-default-900">
                 PostProAI
               </p>
-              <Chip color="warning" variant="dot" classNames={
-                {
-                  base: "ml-2",
-                }
-              }>Beta</Chip>
             </Link>
             <p className="font-display font-normal text-md text-default-600">
               Create an account to get started.

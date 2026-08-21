@@ -2,6 +2,7 @@ import { connectDB } from "@/lib/db/mongoose";
 import Post from "@/lib/db/models/post";
 import { updatePostSchema } from "@/lib/validation/post";
 import { requireUserId } from "@/lib/api/session";
+import { toPostDTO } from "@/lib/api/serializers";
 import { ok, unauthorized, forbidden, notFound, validationError, serverError } from "@/lib/api/respond";
 
 async function loadOwnedPost(id: string, userId: string) {
@@ -22,7 +23,7 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
     const { post, error } = await loadOwnedPost(params.id, userId);
     if (error) return error;
 
-    return ok({ status: "success", post });
+    return ok({ status: "success", post: toPostDTO(post!) });
   } catch (error) {
     return serverError(error, "Failed to load post");
   }
@@ -47,7 +48,7 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
     Object.assign(post!, parsed.data);
     await post!.save();
 
-    return ok({ status: "success", post });
+    return ok({ status: "success", post: toPostDTO(post!) });
   } catch (error) {
     return serverError(error, "Failed to update post");
   }

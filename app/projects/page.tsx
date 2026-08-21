@@ -1,14 +1,11 @@
 "use client";
 import React from "react";
-import Header from "../components/Header";
 import ProjectsTable from "./components/ProjectsTable";
-import { Toaster } from "react-hot-toast";
 import HeaderDashBoard from "../components/HeaderDashBoard";
 
 const Projects: React.FC = () => {
   return (
     <>
-      <Toaster />
       <HeaderDashBoard />
       <section
         className={`flex flex-col items-center justify-center gap-4 pb-10 text-default-800`}

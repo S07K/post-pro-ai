@@ -4,6 +4,7 @@ import Post from "@/lib/db/models/post";
 import { updateProjectSchema } from "@/lib/validation/project";
 import { isFacebookTokenValid } from "@/lib/meta";
 import { requireUserId } from "@/lib/api/session";
+import { toProjectDTO } from "@/lib/api/serializers";
 import { ok, unauthorized, forbidden, notFound, validationError, serverError } from "@/lib/api/respond";
 
 async function loadOwnedProject(id: string, userId: string) {
@@ -33,18 +34,7 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
       }
     }
 
-    return ok({
-      status: "success",
-      project: {
-        id: project!._id,
-        title: project!.title,
-        description: project!.description,
-        captionLimit: project!.captionLimit,
-        postLimit: project!.postLimit,
-        hashtags: project!.hashtags,
-        connections: { facebook: facebookConnected },
-      },
-    });
+    return ok({ status: "success", project: toProjectDTO(project!, facebookConnected) });
   } catch (error) {
     return serverError(error, "Failed to load project");
   }
@@ -73,15 +63,7 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
     }
     await project!.save();
 
-    return ok({
-      status: "success",
-      project: {
-        id: project!._id,
-        title: project!.title,
-        description: project!.description,
-        connections: { facebook: project!.connections.facebook.isEnabled },
-      },
-    });
+    return ok({ status: "success", project: toProjectDTO(project!) });
   } catch (error) {
     return serverError(error, "Failed to update project");
   }

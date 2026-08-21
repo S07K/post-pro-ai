@@ -1,4 +1,5 @@
-import React from "react";
+"use client";
+import React, { useEffect, useState } from "react";
 import {
   Modal,
   ModalContent,
@@ -14,147 +15,59 @@ import {
   TableCell,
   Chip,
   Tooltip,
-  Input,
-  Textarea,
-  Checkbox,
   useDisclosure,
 } from "@nextui-org/react";
-import axios from "axios";
+import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import { EyeIcon } from "@/app/icons/EyeIcon";
 import { EditIcon } from "@/app/icons/EditIcon";
 import { DeleteIcon } from "@/app/icons/DeleteIcon";
+import ProjectFormModal from "@/app/components/ProjectFormModal";
+import { getProjects, updateProject, deleteProject as deleteProjectRequest } from "@/lib/api/client";
+import type { ProjectDTO } from "@/types";
 
 export default function ProjectsTable() {
-  const [projects, setProjects] = React.useState([]);
-  const [isTableLoading, setTableLoading] = React.useState(false);
-  React.useEffect(() => {
+  const router = useRouter();
+  const [projects, setProjects] = useState<ProjectDTO[]>([]);
+  const [isTableLoading, setTableLoading] = useState(true);
+
+  const loadProjects = () => {
     setTableLoading(true);
-    axios
-      .get("/api/projects")
-      .then((response) => {
-        if(response.data.status === "success") {
-          // console.log("response.data: ", response.data);
-          setProjects(response.data.projects);
-          setTableLoading(false);
-        }
-      })
-      .catch((error) => {
-        setTableLoading(false);
-        console.error("Error calling get all project api: ", error);
-        toast.error("Error calling get all project api");
-      });
-  }, []);
-
-  const { isOpen, onOpen, onOpenChange, onClose } = useDisclosure();
-  const { isOpen: isDeleteModalOpen, onOpen: onDeleteModalOpen, onOpenChange: onDeleteModalOpenChange, onClose: onDeleteModalClose } = useDisclosure();
-  const [editProject, setEditProject]: any = React.useState({
-    title: "",
-    description: "",
-    captionLimit: 0,
-    postLimit: 0,
-    openAIKey: "",
-    hashtags: false,
-  });
-  const [isLoading, setLoading] = React.useState(false);
-  const [deleteProject, setDeleteProject]: any = React.useState({});
-
-  async function fetchProject(projectId: string) {
-    await axios
-      .get(`/api/projects/${projectId}`)
-      .then((response) => {
-        // console.log(response.data);
-        if (response.data) {
-          setEditProject(response.data);
-          // toast.success("Project fetched successfully");
-        } else {
-          toast.error("No project found");
-          window.location.href = "/projects";
-        }
-      })
-      .catch(() => {
-        toast.error("Error in fetching project");
-      });
-  }
-
-  async function onDelete() {
-    await axios
-      .delete(`/api/projects/${deleteProject}`)
-      .then((response) => {
-        // console.log(response.data);
-        if (response?.data?.status === "success") {
-          onDeleteModalClose();
-          setLoading(false);
-          toast.success("Project deleted successfully");
-          setTimeout(() => {
-            window.location.reload();
-          }, 1000);
-        } else {
-          console.error("Error in deleting project: ", response?.data?.message);
-          setLoading(false);
-          toast.error("Error in deleting project");
-        }
-      })
-      .catch(() => {
-        toast.error("Error in fetching project");
-      });
-  }
-
-  const handleChange = (event: any) => {
-    setEditProject({
-      ...editProject,
-      [event.target.name]:
-        event.target.type != "checkbox"
-          ? event.target.value
-          : event.target.checked,
-    });
+    getProjects()
+      .then(setProjects)
+      .catch(() => toast.error("Failed to load projects"))
+      .finally(() => setTableLoading(false));
   };
 
-  const onSubmit = async () => {
-    setLoading(true);
-    if (
-      Number(editProject.captionLimit) < 0 ||
-      Number(editProject.postLimit) < 1
-    ) {
-      setLoading(false);
-      toast.error("Please enter valid values for caption limit and post limit");
-      return;
+  useEffect(() => {
+    loadProjects();
+  }, []);
+
+  const { isOpen: isEditOpen, onOpen: onEditOpen, onOpenChange: onEditOpenChange } = useDisclosure();
+  const { isOpen: isDeleteOpen, onOpen: onDeleteOpen, onOpenChange: onDeleteOpenChange, onClose: onDeleteClose } = useDisclosure();
+  const [editingProject, setEditingProject] = useState<ProjectDTO | null>(null);
+  const [deletingProjectId, setDeletingProjectId] = useState<string | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  const handleDelete = async () => {
+    if (!deletingProjectId) return;
+    setIsDeleting(true);
+    try {
+      await deleteProjectRequest(deletingProjectId);
+      toast.success("Project deleted successfully");
+      onDeleteClose();
+      loadProjects();
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Failed to delete project");
+    } finally {
+      setIsDeleting(false);
+      setDeletingProjectId(null);
     }
-    if (!editProject.title || !editProject.openAIKey) {
-      setLoading(false);
-      toast.error("Please fill all the required fields");
-      return;
-    }
-    await axios
-      .put(`/api/projects/${editProject.id}`, editProject)
-      .then((response) => {
-        if (response?.data?.status === "success") {
-          onClose();
-          setLoading(false);
-          toast.success("Project updated successfully");
-          setTimeout(() => {
-            window.location.reload();
-          }, 1000);
-        } else {
-          console.error("Error in updating project: ", response?.data?.message);
-          setLoading(false);
-          toast.error("Error in updating project");
-        }
-      })
-      .catch((error) => {
-        console.error("Error in updating project: ", error);
-        setLoading(false);
-        toast.error("Error in updating project");
-      });
   };
 
   return (
     <>
-      <Table
-        isStriped
-        removeWrapper
-        aria-label="Example static collection table"
-      >
+      <Table isStriped removeWrapper aria-label="Your projects">
         <TableHeader>
           <TableColumn>TITLE</TableColumn>
           <TableColumn>DESCRIPTION</TableColumn>
@@ -163,27 +76,16 @@ export default function ProjectsTable() {
           <TableColumn>HASHTAGS</TableColumn>
           <TableColumn align="center">ACTIONS</TableColumn>
         </TableHeader>
-        <TableBody
-          emptyContent={"No rows to display."}
-          isLoading={isTableLoading}
-        >
-          {projects.map((project: any, index: number) => (
-            <TableRow
-              key={project._id}
-              className="hover:cursor-pointer"
-              // href={`/projects/${project._id}`}
-            >
+        <TableBody emptyContent="No projects yet." isLoading={isTableLoading}>
+          {projects.map((project) => (
+            <TableRow key={project.id}>
               <TableCell>{project.title}</TableCell>
               <TableCell>{project.description}</TableCell>
               <TableCell>{project.captionLimit}</TableCell>
               <TableCell>{project.postLimit}</TableCell>
               <TableCell>
                 <Chip
-                  className={`capitalize post-pro ${
-                    project.hashtags
-                      ? "text-success-700 bg-success-100"
-                      : "text-danger-500 bg-danger-100"
-                  }`}
+                  className={`capitalize post-pro ${project.hashtags ? "text-success-700 bg-success-100" : "text-danger-500 bg-danger-100"}`}
                   color={project.hashtags ? "success" : "danger"}
                   size="sm"
                   variant="flat"
@@ -193,43 +95,47 @@ export default function ProjectsTable() {
               </TableCell>
               <TableCell align="center">
                 <div className="relative flex justify-center items-center gap-2">
-                  <Tooltip
-                    className="text-background bg-foreground"
-                    content="View project"
-                  >
-                    <span
-                      onClick={() => {
-                        window.location.href = `/projects/${project._id}`;
-                      }}
-                      className="text-lg text-default-400 cursor-pointer active:opacity-50"
+                  <Tooltip className="text-background bg-foreground" content="View project">
+                    <Button
+                      isIconOnly
+                      variant="light"
+                      size="sm"
+                      aria-label="View project"
+                      onPress={() => router.push(`/projects/${project.id}`)}
+                      className="text-lg text-default-400"
                     >
                       <EyeIcon />
-                    </span>
+                    </Button>
                   </Tooltip>
-                  <Tooltip
-                    className="text-background bg-foreground"
-                    content="Edit project"
-                  >
-                    <span
-                      onClick={(e) => {
-                        onOpen();
-                        fetchProject(project._id);
+                  <Tooltip className="text-background bg-foreground" content="Edit project">
+                    <Button
+                      isIconOnly
+                      variant="light"
+                      size="sm"
+                      aria-label="Edit project"
+                      onPress={() => {
+                        setEditingProject(project);
+                        onEditOpen();
                       }}
-                      className="text-lg text-default-400 cursor-pointer active:opacity-50"
+                      className="text-lg text-default-400"
                     >
                       <EditIcon />
-                    </span>
+                    </Button>
                   </Tooltip>
                   <Tooltip color="danger" className="post-pro bg-danger-500" content="Delete project">
-                    <span
-                      onClick={(e) => {
-                        onDeleteModalOpen();
-                        setDeleteProject(project._id);
+                    <Button
+                      isIconOnly
+                      variant="light"
+                      size="sm"
+                      aria-label="Delete project"
+                      onPress={() => {
+                        setDeletingProjectId(project.id);
+                        onDeleteOpen();
                       }}
-                      className="text-lg post-pro text-danger-500 cursor-pointer active:opacity-50"
+                      className="text-lg post-pro text-danger-500"
                     >
                       <DeleteIcon />
-                    </span>
+                    </Button>
                   </Tooltip>
                 </div>
               </TableCell>
@@ -237,124 +143,26 @@ export default function ProjectsTable() {
           ))}
         </TableBody>
       </Table>
-      <Modal backdrop={"blur"} isOpen={isOpen} onOpenChange={onOpenChange} size="lg">
+
+      <ProjectFormModal
+        isOpen={isEditOpen}
+        onOpenChange={onEditOpenChange}
+        project={editingProject}
+        onSubmit={(values) => updateProject(editingProject!.id, values)}
+        onSaved={loadProjects}
+      />
+
+      <Modal backdrop="blur" isOpen={isDeleteOpen} onOpenChange={onDeleteOpenChange} size="lg">
         <ModalContent className="text-default-800">
           {(onClose) => (
             <>
-              <ModalHeader className="flex flex-col gap-1">
-                Create New Project
-              </ModalHeader>
-              <ModalBody>
-                <Input
-                  isRequired
-                  name="title"
-                  value={editProject.title}
-                  onChange={handleChange}
-                  type="text"
-                  variant={"underlined"}
-                  label="Choose a topic"
-                  description="Enter a topic you want to post on."
-                />
-                <Textarea
-                  name="description"
-                  value={editProject.description}
-                  onChange={handleChange}
-                  variant={"underlined"}
-                  // label="Description"
-                  description="Enter a description for your project."
-                  labelPlacement="outside"
-                  placeholder="Enter project description"
-                />
-                <div className="grid grid-cols-2 gap-4">
-                  <Input
-                    name="captionLimit"
-                    value={editProject.captionLimit}
-                    min={0}
-                    max={250}
-                    onChange={handleChange}
-                    type="number"
-                    variant={"underlined"}
-                    label="Caption Limit"
-                    description="Enter a limit for your post caption."
-                  />
-                  <Input
-                    name="postLimit"
-                    value={editProject.postLimit}
-                    min={1}
-                    max={10}
-                    onChange={handleChange}
-                    type="number"
-                    variant={"underlined"}
-                    label="No. of post"
-                    description="Enter how many post you want to generate."
-                  />
-                </div>
-                <Input
-                  isRequired
-                  name="openAIKey"
-                  value={editProject.openAIKey}
-                  onChange={handleChange}
-                  type="text"
-                  variant={"underlined"}
-                  label="Openai api key"
-                  description="Add your openai api key"
-                />
-                <Checkbox
-                  checked={editProject.hashtags}
-                  name="hashtags"
-                  onChange={handleChange}
-                  defaultSelected
-                >
-                  Add hashtags?
-                </Checkbox>
-              </ModalBody>
+              <ModalHeader className="flex flex-col gap-1">Delete Project</ModalHeader>
+              <ModalBody>Are you sure? This will also delete all posts in this project.</ModalBody>
               <ModalFooter>
-                <Button
-                  className="text-default-800 post-pro bg-primary-100"
-                  variant="light"
-                  onPress={() => {
-                    setEditProject({});
-                    onClose();
-                  }}
-                >
+                <Button className="text-default-800 post-pro bg-primary-100" variant="light" onPress={onClose}>
                   Cancel
                 </Button>
-                <Button
-                  className="post-pro bg-primary-500 text-default-50"
-                  onPress={onSubmit}
-                  isLoading={isLoading}
-                >
-                  Save
-                </Button>
-              </ModalFooter>
-            </>
-          )}
-        </ModalContent>
-      </Modal>
-      <Modal backdrop={"blur"} isOpen={isDeleteModalOpen} onOpenChange={onDeleteModalOpenChange} size="lg">
-        <ModalContent className="text-default-800">
-          {(onClose) => (
-            <>
-              <ModalHeader className="flex flex-col gap-1">
-                Delete Project
-              </ModalHeader>
-              <ModalBody>Are you sure?</ModalBody>
-              <ModalFooter>
-                <Button
-                  className="text-default-800 post-pro bg-primary-100"
-                  variant="light"
-                  onPress={() => {
-                    setDeleteProject({});
-                    onClose();
-                  }}
-                >
-                  Cancel
-                </Button>
-                <Button
-                  className="post-pro bg-danger-500 text-default-50"
-                  onPress={onDelete}
-                  isLoading={isLoading}
-                >
+                <Button className="post-pro bg-danger-500 text-default-50" onPress={handleDelete} isLoading={isDeleting}>
                   Yes, delete
                 </Button>
               </ModalFooter>

@@ -2,6 +2,7 @@ import { connectDB } from "@/lib/db/mongoose";
 import Project from "@/lib/db/models/project";
 import { createProjectSchema } from "@/lib/validation/project";
 import { requireUserId } from "@/lib/api/session";
+import { toProjectDTO } from "@/lib/api/serializers";
 import { ok, unauthorized, fail, validationError, serverError } from "@/lib/api/respond";
 
 export async function GET() {
@@ -13,7 +14,7 @@ export async function GET() {
 
     await connectDB();
     const projects = await Project.find({ userId }).sort({ createdAt: -1 });
-    return ok({ status: "success", projects });
+    return ok({ status: "success", projects: projects.map((p) => toProjectDTO(p)) });
   } catch (error) {
     return serverError(error, "Failed to load projects");
   }
@@ -38,7 +39,7 @@ export async function POST(req: Request) {
     }
 
     const project = await Project.create({ ...parsed.data, userId });
-    return ok({ status: "success", project });
+    return ok({ status: "success", project: toProjectDTO(project) });
   } catch (error) {
     return serverError(error, "Failed to create project");
   }

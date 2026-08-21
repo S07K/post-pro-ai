@@ -1,6 +1,6 @@
 "use client";
 import React, { useState } from "react";
-import { Button, Chip, Input, Link } from "@nextui-org/react";
+import { Button, Input, Link } from "@nextui-org/react";
 import loginImg from "@/app/assets/images/loginImg.png";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -66,11 +66,6 @@ const Login: React.FC = () => {
               <p className="font-display font-semibold text-4xl text-default-900">
                 PostProAI
               </p>
-              <Chip color="warning" variant="dot" classNames={
-                {
-                  base: "ml-2",
-                }
-              }>Beta</Chip>
             </Link>
             <p className="font-display font-normal text-md text-default-600">
               Welcome back! Please login to your account.
@@ -107,9 +102,6 @@ const Login: React.FC = () => {
             <div className="flex flex-col gap-4 py-2 px-1">
               <Link color="primary" href="/register" size="sm">
                 Create an account
-              </Link>
-              <Link color="primary" href="/forgot-password" size="sm">
-                Forgot password?
               </Link>
             </div>
             <Button className="bg-foreground text-background" color="primary" isLoading={isLoggingIn} onClick={handleSubmit}>

@@ -2,6 +2,7 @@ import { connectDB } from "@/lib/db/mongoose";
 import Project from "@/lib/db/models/project";
 import Post from "@/lib/db/models/post";
 import { requireUserId } from "@/lib/api/session";
+import { toPostDTO } from "@/lib/api/serializers";
 import { ok, unauthorized, forbidden, notFound, serverError } from "@/lib/api/respond";
 
 export async function GET(req: Request, { params }: { params: { projectId: string } }) {
@@ -17,7 +18,7 @@ export async function GET(req: Request, { params }: { params: { projectId: strin
     if (project.userId !== userId) return forbidden();
 
     const posts = await Post.find({ projectId: params.projectId }).sort({ createdAt: -1 });
-    return ok({ status: "success", posts });
+    return ok({ status: "success", posts: posts.map(toPostDTO) });
   } catch (error) {
     return serverError(error, "Failed to load posts");
   }
