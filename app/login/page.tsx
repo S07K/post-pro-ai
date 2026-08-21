@@ -3,17 +3,18 @@ import React, { useState } from "react";
 import { Button, Chip, Input, Link } from "@nextui-org/react";
 import loginImg from "@/app/assets/images/loginImg.png";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
+import { signIn } from "next-auth/react";
 import { LockIcon } from "../icons/LockIcon";
 import { MailIcon } from "../icons/MailIcon";
 import toast, { Toaster } from "react-hot-toast";
-import axios from "axios";
 
-const Login: React.FC = (props) => {
+const Login: React.FC = () => {
+  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [formError, setFormError] = useState("");
   const [isLoggingIn, setIsLoggingIn] = useState(false);
-
 
   const handleEmailChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setEmail(event.target.value);
@@ -23,43 +24,26 @@ const Login: React.FC = (props) => {
     setPassword(event.target.value);
   };
 
-  // window.addEventListener("keypress", (event) => {
-  //   if (event.key === "Enter" && !isLoggingIn) {
-  //     event.preventDefault();
-  //     event.stopPropagation();
-  //     handleSubmit(event);
-  //   }
-  // });
-
-  const handleSubmit = (event: any) => {
+  const handleSubmit = async (event: React.FormEvent | React.MouseEvent) => {
     event.preventDefault();
     if (!email || !password) {
       setFormError("Please fill in all fields");
+      return;
     }
+    setFormError("");
     setIsLoggingIn(true);
-    axios
-      .post("/api/login", {
-        email,
-        password,
-      })
-      .then((response) => {
-        // console.log(response);
-        if (response.data.status === "success") {
-          window.location.href = "/dashboard";
-        } else {
-          setIsLoggingIn(false);
-          if (response.data.status === "error") {
-            toast.error(response.data.message);
-          } else {
-            toast.error("An error occurred");
-          }
-        }
-      })
-      .catch((error) => {
-        setIsLoggingIn(false);
-        console.error(error);
-        toast.error("An error occurred");
-      });
+    const result = await signIn("credentials", {
+      email,
+      password,
+      redirect: false,
+    });
+    setIsLoggingIn(false);
+    if (result?.ok) {
+      router.push("/dashboard");
+      router.refresh();
+    } else {
+      toast.error("Invalid email or password");
+    }
   };
 
   return (

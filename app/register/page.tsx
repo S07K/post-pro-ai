@@ -3,10 +3,12 @@ import React, { useState } from "react";
 import { Button, Chip, Input, Link } from "@nextui-org/react";
 import loginImg from "@/app/assets/images/registerImg.png";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import axios from "axios";
 import toast, { Toaster } from "react-hot-toast";
 
-const Login: React.FC = (props) => {
+const Register: React.FC = () => {
+  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [passwordError, setPasswordError] = useState("");
@@ -28,14 +30,7 @@ const Login: React.FC = (props) => {
     setConfirmPasswordChange(event.target.value);
   };
 
-  // window.addEventListener("keydown", (event) => {
-  //   if (event.key === "Enter" && !isRegistering) {
-  //     event.preventDefault();
-  //     handleSubmit(event);
-  //   }
-  // });
-
-  const handleSubmit = (event: any) => {
+  const handleSubmit = (event: React.FormEvent | React.MouseEvent) => {
     event.preventDefault();
     if (!email || !password || !confirmPassword) {
       setFormError("Please fill in all fields");
@@ -61,7 +56,7 @@ const Login: React.FC = (props) => {
           toast.success("Account created successfully");
           setTimeout(() => {
             setIsRegistering(false);
-            window.location.href = "/login";
+            router.push("/login");
           }, 2000);
         } else {
           setIsRegistering(false);
@@ -162,4 +157,4 @@ const Login: React.FC = (props) => {
   );
 };
 
-export default Login;
+export default Register;

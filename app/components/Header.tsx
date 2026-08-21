@@ -1,7 +1,7 @@
 "use client";
-import React, { useEffect } from "react";
-import axios from "axios";
-import toast, { Toaster } from "react-hot-toast";
+import React from "react";
+import { useSession, signOut } from "next-auth/react";
+import { Toaster } from "react-hot-toast";
 import {
   Navbar,
   NavbarBrand,
@@ -16,74 +16,18 @@ import {
 } from "@nextui-org/react";
 import Link from "next/link";
 
-export default function Header({children}: any) {
+export default function Header({children}: {children?: React.ReactNode}) {
+  const { data: session } = useSession();
+  const user = session?.user;
 
-  const [user, setUser] = React.useState<any>({});
+  const logOut = () => {
+    signOut({ callbackUrl: "/login" });
+  };
 
-    const logOut = () => {
-      axios
-      .post("/api/logout")
-      .then((response) => {
-        console.log(response);
-        if (response.data.status === "success") {
-          window.location.href = "/login";
-        } else {
-          if (response.data.status === "error") {
-            toast.error(response.data.message);
-          } else {
-            toast.error("An error occurred");
-          }
-        }
-      })
-      .catch((error) => {
-        console.error(error);
-        toast.error("An error occurred");
-      });
-    };
-
-    const fetchUser = async () => {
-      axios
-      .get("/api/user")
-      .then((response) => {
-        // console.log(response);
-        if (response.data.status === "success") {
-          // console.log('User data: ', response.data);
-          setUser(response.data.user);
-        } else {
-          if (response.data.status === "error") {
-            toast.error(<div>
-            <h1 className="font-bold">Error</h1>
-            <p>{response.data.message}</p>
-            <p>Logging Out...</p>
-            </div>);
-            setTimeout(() => {
-              logOut();
-            }, 3000);
-          } else {
-            toast.error(<div>
-              <h1 className="font-bold">Error</h1>
-              <p>Logging Out...</p>
-              </div>);
-              setTimeout(() => {
-                logOut();
-              }, 3000);
-          }
-        }
-      })
-      .catch((error) => {
-        console.error(error);
-        toast.error("An error occurred");
-      });
-    }
-
-    useEffect(() => {
-      fetchUser();
-    }, []);
-
-    return (
-      <>
-        <Toaster />
-        <Navbar className="bg-[#000]">
+  return (
+    <>
+      <Toaster />
+      <Navbar className="bg-[#000]">
           <NavbarContent justify="start">
             <NavbarBrand className="mr-4">
               <Link href="/">
@@ -120,18 +64,13 @@ export default function Header({children}: any) {
                   // src="https://i.pravatar.cc/150?u=a04258a2462d826712d"
                 />
               </DropdownTrigger>
-              <DropdownMenu aria-label="User Actions">
-                {
-                  user.email &&
-                  <DropdownItem textValue="Profile" key="profile" className="h-14 gap-2">
-                    <p className="font-bold">Signed in as</p>
-                    <p className="font-bold">{user.email}</p>
-                  </DropdownItem>
-                }
-                {/* <DropdownItem textValue="Settings" key="settings">Settings</DropdownItem> */}
+              <DropdownMenu aria-label="User Actions" disabledKeys={user?.email ? [] : ["profile"]}>
+                <DropdownItem textValue="Profile" key="profile" className={user?.email ? "h-14 gap-2" : "hidden"}>
+                  <p className="font-bold">Signed in as</p>
+                  <p className="font-bold">{user?.email}</p>
+                </DropdownItem>
                 <DropdownItem textValue="Projects" key="team_settings" href="/projects">Projects</DropdownItem>
                 <DropdownItem textValue="Analytics" key="analytics" href="/#analytics">Analytics</DropdownItem>
-                {/* <DropdownItem textValue="Help & Feedback" key="help_and_feedback">Help & Feedback</DropdownItem> */}
                 <DropdownItem textValue="Log Out" key="logout" color="danger" onClick={logOut}>
                   Log Out
                 </DropdownItem>
@@ -139,7 +78,6 @@ export default function Header({children}: any) {
             </Dropdown>
           </NavbarContent>
         </Navbar>
-        <Toaster />
       </>
     );
   }
