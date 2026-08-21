@@ -5,11 +5,12 @@ import { APP_ID, CONFIG_ID } from "@/app/lib/utils";
 import toast from "react-hot-toast";
 import PostCard from "@/app/components/Card";
 import HeaderProject from "./components/HeaderProject";
-import { Button, Link, Spinner } from "@nextui-org/react";
-import { ArrowLeftIcon } from "@/app/icons/ArrowLeftIcon";
+import AppShell from "@/app/components/AppShell";
+import { Button, Spinner } from "@nextui-org/react";
 import { FacebookIcon } from "@/app/icons/FacebookIcon";
 import Script from "next/script";
 import { getProject, getProjectPosts, setProjectFacebookAccess, updateProject } from "@/lib/api/client";
+import { StaggerGrid, StaggerCell, staggerContainer, staggerItem } from "@/app/components/StaggerReveal";
 import type { ProjectDTO, PostDTO } from "@/types";
 
 interface NewProjectProps {
@@ -74,73 +75,72 @@ const NewProject: React.FC<NewProjectProps> = ({ params }) => {
     };
   }, [fetchProject, fetchPosts]);
 
+  const facebookAction = project ? (
+    project.connections.facebook ? (
+      <Button className="post-pro bg-[#1a77f2] text-white font-mono" onPress={removeConnection}>
+        <FacebookIcon /> Disconnect
+      </Button>
+    ) : (
+      <Button
+        className="post-pro bg-[#1a77f2] text-white font-mono hover:cursor-pointer"
+        onPress={() => {
+          window.FB.login(
+            (response: any) => {
+              if (response.authResponse && response.status === "connected") {
+                connectFacebook(response.authResponse.accessToken);
+              }
+            },
+            { config_id: CONFIG_ID }
+          );
+        }}
+      >
+        <FacebookIcon /> Connect Instagram
+      </Button>
+    )
+  ) : null;
+
   return (
     <>
-      <div>
-        <HeaderProject projectId={projectId} project={project} onPostCreated={fetchPosts} />
-        <section className="flex flex-col items-center justify-center gap-4 pb-10 text-default-800">
-          <div className="flex flex-col max-w-[1440px] w-full px-3 md:px-6">
-            {!project ? (
-              <div className="flex justify-center pt-20">
-                <Spinner />
-              </div>
+      <AppShell
+        title={project?.title ?? "Project"}
+        subtitle={project?.description}
+        actions={
+          project ? (
+            <>
+              {facebookAction}
+              <HeaderProject projectId={projectId} project={project} onPostCreated={fetchPosts} />
+            </>
+          ) : null
+        }
+      >
+        {!project ? (
+          <div className="flex justify-center pt-20">
+            <Spinner />
+          </div>
+        ) : (
+          <div>
+            <h2 className="font-display text-2xl text-default-900 pt-4">Posts</h2>
+            {posts.length > 0 ? (
+              <StaggerGrid
+                variants={staggerContainer}
+                initial="hidden"
+                animate="show"
+                className="flex flex-wrap justify-center sm:justify-start gap-4 pt-6"
+              >
+                {posts.map((post) => (
+                  <StaggerCell key={post.id} variants={staggerItem}>
+                    <PostCard post={post} />
+                  </StaggerCell>
+                ))}
+              </StaggerGrid>
             ) : (
-              <>
-                <div className="pt-10">
-                  <div className="flex justify-between items-center flex-wrap gap-3">
-                    <div className="flex gap-2 md:gap-5 flex-wrap">
-                      <Link href="/projects" className="text-default-500">
-                        <ArrowLeftIcon className="text-default-800" />
-                      </Link>
-                      <h1 className="text-lg md:text-2xl">{project.title}</h1>
-                    </div>
-                    <div>
-                      {project.connections.facebook ? (
-                        <div id="status" className="text-default-900">
-                          <Button className="post-pro bg-[#1a77f2] text-default-50" onPress={removeConnection}>
-                            <FacebookIcon /> Disconnect
-                          </Button>
-                        </div>
-                      ) : (
-                        <Button
-                          className="post-pro bg-[#1a77f2] text-default-50 hover:cursor-pointer"
-                          onPress={() => {
-                            window.FB.login(
-                              (response: any) => {
-                                if (response.authResponse && response.status === "connected") {
-                                  connectFacebook(response.authResponse.accessToken);
-                                }
-                              },
-                              { config_id: CONFIG_ID }
-                            );
-                          }}
-                        >
-                          <FacebookIcon /> Connect Instagram
-                        </Button>
-                      )}
-                    </div>
-                  </div>
-                  <p className="text-default-500 pt-2 text-sm md:text-medium">{project.description}</p>
-                </div>
-                <div>
-                  <h2 className="text-2xl pt-10">Posts</h2>
-                  {posts.length > 0 ? (
-                    <div className="flex flex-wrap justify-center sm:justify-start gap-4 pt-10">
-                      {posts.map((post) => (
-                        <PostCard key={post.id} post={post} />
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="h-[300px] flex flex-col flex-wrap justify-center items-center gap-4 pt-10 border-1 rounded-md mt-5">
-                      <p>No post in the project yet</p>
-                    </div>
-                  )}
-                </div>
-              </>
+              <div className="h-[240px] flex flex-col flex-wrap justify-center items-center gap-4 mt-6 border hairline rounded-large">
+                <p className="text-default-500">No post in the project yet</p>
+              </div>
             )}
           </div>
-        </section>
-      </div>
+        )}
+      </AppShell>
       <Script async defer crossOrigin="anonymous" src="https://connect.facebook.net/en_US/sdk.js" />
     </>
   );

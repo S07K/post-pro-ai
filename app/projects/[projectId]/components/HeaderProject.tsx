@@ -1,5 +1,4 @@
 "use client";
-import Header from "@/app/components/Header";
 import { AddIcon } from "@/app/icons/AddIcon";
 import toast from "react-hot-toast";
 import MaskImage from "@/app/assets/images/Mask_IMG.svg";
@@ -98,8 +97,8 @@ const HeaderProject: React.FC<{ projectId: string; project: ProjectDTO | null; o
   };
 
   return (
-    <Header>
-      <Button onPress={onOpen} className="post-pro bg-default-50 text-md" endContent={<AddIcon />}>
+    <>
+      <Button onPress={onOpen} className="post-pro bg-primary-500 text-primary-50 font-mono" endContent={<AddIcon />}>
         New post
       </Button>
       <Modal backdrop="blur" isOpen={isOpen} onOpenChange={onOpenChange} onClose={resetForm} size="lg">
@@ -224,7 +223,7 @@ const HeaderProject: React.FC<{ projectId: string; project: ProjectDTO | null; o
           )}
         </ModalContent>
       </Modal>
-    </Header>
+    </>
   );
 };
 

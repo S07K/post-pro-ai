@@ -41,14 +41,14 @@ const Analytics: React.FC = () => {
   return (
     <>
       <section id="analytics" className="pt-4 flex gap-6 flex-col sm:flex-row">
-        <InfoCard title="Total posts" count={analytics.totalPosts} icon={<GraphIcon />} bg="bg-[#80AF81]" />
-        <InfoCard title="Projects" count={analytics.totalProjects} icon={<FollowersIcon />} bg="bg-[#6EACDA]" />
-        <InfoCard title="Posted to Instagram" count={analytics.byStatus.posted} icon={<LikesIcon />} bg="bg-[#EF5A6F]" />
+        <InfoCard title="Total posts" count={analytics.totalPosts} icon={<GraphIcon />} bg="bg-primary-500" />
+        <InfoCard title="Projects" count={analytics.totalProjects} icon={<FollowersIcon />} bg="bg-secondary-500" />
+        <InfoCard title="Posted to Instagram" count={analytics.byStatus.posted} icon={<LikesIcon />} bg="bg-warning-600" />
       </section>
       <section className="pt-10 flex gap-6 flex-col sm:flex-row">
         <div className="w-full flex flex-wrap gap-5">
-          <PostViewsChart data={postsPerWeekData} id="posts-per-week" title="Posts created (last 8 weeks)" chartColor="#80AF81" />
-          <PostViewsChart data={byStatusData} id="posts-by-status" title="Posts by status" chartColor="#6EACDA" />
+          <PostViewsChart data={postsPerWeekData} id="posts-per-week" title="Posts created (last 8 weeks)" chartColor="#d1471f" />
+          <PostViewsChart data={byStatusData} id="posts-by-status" title="Posts by status" chartColor="#215952" />
         </div>
       </section>
     </>

@@ -2,7 +2,6 @@
 import React from "react";
 import { useDisclosure, Button } from "@nextui-org/react";
 import { useRouter } from "next/navigation";
-import Header from "./Header";
 import { AddIcon } from "../icons/AddIcon";
 import ProjectFormModal from "./ProjectFormModal";
 import { createProject } from "@/lib/api/client";
@@ -12,9 +11,9 @@ export default function HeaderDashBoard() {
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
 
   return (
-    <Header>
-      <Button onPress={onOpen} className="post-pro bg-default-50 text-md" endContent={<AddIcon />}>
-        New
+    <>
+      <Button onPress={onOpen} className="post-pro bg-primary-500 text-primary-50 font-mono" endContent={<AddIcon />}>
+        New project
       </Button>
       <ProjectFormModal
         isOpen={isOpen}
@@ -22,6 +21,6 @@ export default function HeaderDashBoard() {
         onSubmit={createProject}
         onSaved={(project) => router.push(`/projects/${project.id}`)}
       />
-    </Header>
+    </>
   );
 }

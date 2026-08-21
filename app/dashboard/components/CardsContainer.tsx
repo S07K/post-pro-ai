@@ -4,6 +4,7 @@ import toast from "react-hot-toast";
 import { Card, CardBody, CardFooter, Skeleton } from "@nextui-org/react";
 import PostCard from "../../components/Card";
 import { getRecentPosts } from "@/lib/api/client";
+import { StaggerGrid, StaggerCell, staggerContainer, staggerItem } from "../../components/StaggerReveal";
 import type { PostDTO } from "@/types";
 
 function CardSkeleton() {
@@ -43,15 +44,17 @@ const CardsContainer: React.FC = () => {
   }
 
   if (posts.length === 0) {
-    return <p className="pt-4 text-default-50">No posts yet. Create a project and generate your first post to see it here.</p>;
+    return <p className="pt-4 text-default-500">No posts yet. Create a project and generate your first post to see it here.</p>;
   }
 
   return (
-    <div className="flex overflow-auto hide-scroll gap-6 pt-4">
+    <StaggerGrid variants={staggerContainer} initial="hidden" animate="show" className="flex overflow-auto hide-scroll gap-6 pt-4">
       {posts.map((post) => (
-        <PostCard key={post.id} post={post} />
+        <StaggerCell key={post.id} variants={staggerItem}>
+          <PostCard post={post} />
+        </StaggerCell>
       ))}
-    </div>
+    </StaggerGrid>
   );
 };
 

@@ -3,38 +3,21 @@
 @tailwind utilities;
 
 :root {
-  --foreground-rgb: 0, 0, 0;
-  --background-start-rgb: 214, 219, 220;
-  --background-end-rgb: 255, 255, 255;
-  --color-50: #f0f3f6;
-  --color-100: #e1e7ed;
-  --color-200: #c3cfdc;
-  --color-300: #a5b7ca;
-  --color-400: #879fb9;
-  --color-500: #6482AD;
-  --color-600: #556b94;
-  --color-700: #45557b;
-  --color-800: #364062;
-  --color-900: #293547;
-  --color-dark: #000000;
+  --glow-accent: 226, 87, 43; /* burnt amber, rgb */
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --foreground-rgb: 255, 255, 255;
-    --background-start-rgb: 0, 0, 0;
-    --background-end-rgb: 0, 0, 0;
-  }
-}
-
+/* Soft off-center glow in the accent color plus fine photographic grain,
+   fixed so the atmosphere reads as continuous behind scrolling content
+   rather than tied to any single section. The grain's opacity is baked
+   into the SVG itself (data: URIs can't reference CSS custom properties). */
 body {
-  color: rgb(var(--foreground-rgb));
-  /* background: linear-gradient(
-      to bottom,
-      transparent,
-      rgb(var(--background-end-rgb))
-    )
-    rgb(var(--background-start-rgb)); */
+  background-color: hsl(var(--nextui-background));
+  background-image:
+    radial-gradient(circle at 15% -10%, rgba(var(--glow-accent), 0.16), transparent 45%),
+    radial-gradient(circle at 90% 10%, rgba(var(--glow-accent), 0.08), transparent 40%),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.05'/%3E%3C/svg%3E");
+  background-attachment: fixed, fixed, fixed;
+  background-size: cover, cover, 140px 140px;
 }
 
 @layer utilities {
@@ -59,6 +42,12 @@ body {
 
   .post-pro {
     transition: background-color 150ms ease, color 150ms ease, opacity 150ms ease;
+  }
+
+  /* Hairline border using the theme's own foreground at low opacity, so it
+     stays correct across light/dark without a second set of border tokens. */
+  .hairline {
+    border-color: hsl(var(--nextui-foreground) / 0.12);
   }
 
   header {

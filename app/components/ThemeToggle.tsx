@@ -5,7 +5,7 @@ import { Button } from "@nextui-org/react";
 import { SunIcon } from "../icons/SunIcon";
 import { MoonIcon } from "../icons/MoonIcon";
 
-export default function ThemeToggle() {
+export default function ThemeToggle({ className = "text-default-500" }: { className?: string }) {
   const { theme, setTheme } = useTheme();
   // Avoid rendering theme-dependent UI before the client has hydrated (next-themes
   // can't know the persisted theme during SSR).
@@ -25,7 +25,7 @@ export default function ThemeToggle() {
       size="sm"
       aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
       onPress={() => setTheme(isDark ? "light" : "dark")}
-      className="text-white"
+      className={className}
     >
       {isDark ? <SunIcon /> : <MoonIcon />}
     </Button>
