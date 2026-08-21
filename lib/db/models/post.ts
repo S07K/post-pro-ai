@@ -13,6 +13,8 @@ export interface IPost extends Document {
   scheduledAt: Date | null;
   publishedAt: Date | null;
   failureReason: string;
+  metaContainerId: string;
+  metaInstagramId: string;
   createdAt: Date;
 }
 
@@ -26,6 +28,8 @@ const postSchema = new Schema<IPost>({
   scheduledAt: { type: Date, default: null },
   publishedAt: { type: Date, default: null },
   failureReason: { type: String, default: "" },
+  metaContainerId: { type: String, default: "" },
+  metaInstagramId: { type: String, default: "" },
   createdAt: { type: Date, default: Date.now },
 });
 

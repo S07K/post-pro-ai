@@ -17,5 +17,14 @@ export default withAuth(
 );
 
 export const config = {
-  matcher: ["/", "/dashboard/:path*", "/projects/:path*", "/api/projects/:path*", "/api/post/:path*", "/api/openai/:path*", "/api/user/:path*"],
+  matcher: [
+    "/",
+    "/dashboard/:path*",
+    "/projects/:path*",
+    "/api/projects/:path*",
+    "/api/posts/:path*",
+    "/api/openai/:path*",
+    "/api/user/:path*",
+    "/api/analytics/:path*",
+  ],
 };
