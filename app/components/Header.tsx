@@ -13,6 +13,7 @@ import {
   Avatar,
 } from "@nextui-org/react";
 import Link from "next/link";
+import ThemeToggle from "./ThemeToggle";
 
 export default function Header({children}: {children?: React.ReactNode}) {
   const { data: session } = useSession();
@@ -48,8 +49,9 @@ export default function Header({children}: {children?: React.ReactNode}) {
               type="search"
             />
           </NavbarContent> */}
-          <NavbarContent as="div" className="items-center" justify="end">
+          <NavbarContent as="div" className="items-center gap-2" justify="end">
             {children}
+            <ThemeToggle />
             <Dropdown placement="bottom-start" className="post-pro bg-primary-900">
               <DropdownTrigger>
                 <Avatar
