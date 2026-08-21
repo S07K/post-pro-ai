@@ -1,7 +1,7 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import toast from "react-hot-toast";
-import { Spinner } from "@nextui-org/react";
+import { Skeleton } from "@nextui-org/react";
 import InfoCard from "./InfoCard";
 import { GraphIcon } from "../../icons/GraphIcon";
 import { FollowersIcon } from "../../icons/FollowersIcon";
@@ -21,8 +21,10 @@ const Analytics: React.FC = () => {
 
   if (!analytics) {
     return (
-      <div className="flex justify-center pt-4">
-        <Spinner />
+      <div className="pt-4 flex gap-6 flex-col sm:flex-row">
+        {[...Array(3)].map((_, i) => (
+          <Skeleton key={i} className="rounded-large w-full sm:w-[300px] h-[100px]" />
+        ))}
       </div>
     );
   }

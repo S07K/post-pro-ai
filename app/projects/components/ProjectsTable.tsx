@@ -15,6 +15,9 @@ import {
   TableCell,
   Chip,
   Tooltip,
+  Card,
+  CardBody,
+  Skeleton,
   useDisclosure,
 } from "@nextui-org/react";
 import { useRouter } from "next/navigation";
@@ -65,9 +68,101 @@ export default function ProjectsTable() {
     }
   };
 
+  const openEdit = (project: ProjectDTO) => {
+    setEditingProject(project);
+    onEditOpen();
+  };
+
+  const openDelete = (projectId: string) => {
+    setDeletingProjectId(projectId);
+    onDeleteOpen();
+  };
+
+  const actions = (project: ProjectDTO) => (
+    <div className="relative flex justify-center items-center gap-2">
+      <Tooltip className="text-background bg-foreground" content="View project">
+        <Button
+          isIconOnly
+          variant="light"
+          size="sm"
+          aria-label="View project"
+          onPress={() => router.push(`/projects/${project.id}`)}
+          className="text-lg text-default-400"
+        >
+          <EyeIcon />
+        </Button>
+      </Tooltip>
+      <Tooltip className="text-background bg-foreground" content="Edit project">
+        <Button isIconOnly variant="light" size="sm" aria-label="Edit project" onPress={() => openEdit(project)} className="text-lg text-default-400">
+          <EditIcon />
+        </Button>
+      </Tooltip>
+      <Tooltip color="danger" className="post-pro bg-danger-500" content="Delete project">
+        <Button
+          isIconOnly
+          variant="light"
+          size="sm"
+          aria-label="Delete project"
+          onPress={() => openDelete(project.id)}
+          className="text-lg post-pro text-danger-500"
+        >
+          <DeleteIcon />
+        </Button>
+      </Tooltip>
+    </div>
+  );
+
+  const hashtagsChip = (project: ProjectDTO) => (
+    <Chip
+      className={`capitalize post-pro ${project.hashtags ? "text-success-700 bg-success-100" : "text-danger-500 bg-danger-100"}`}
+      color={project.hashtags ? "success" : "danger"}
+      size="sm"
+      variant="flat"
+    >
+      {project.hashtags ? "enabled" : "disabled"}
+    </Chip>
+  );
+
+  if (isTableLoading) {
+    return (
+      <div className="w-full flex flex-col gap-3">
+        {[...Array(3)].map((_, i) => (
+          <Skeleton key={i} className="rounded-lg h-16 w-full" />
+        ))}
+      </div>
+    );
+  }
+
   return (
     <>
-      <Table isStriped removeWrapper aria-label="Your projects">
+      {/* Card list on small screens */}
+      <div className="w-full flex flex-col gap-3 md:hidden">
+        {projects.length === 0 ? (
+          <p className="text-default-500 py-6 text-center w-full">No projects yet.</p>
+        ) : (
+          projects.map((project) => (
+            <Card key={project.id} className="w-full">
+              <CardBody className="gap-2">
+                <div className="flex justify-between items-start gap-2">
+                  <div>
+                    <p className="font-semibold text-default-900">{project.title}</p>
+                    <p className="text-default-500 text-sm">{project.description}</p>
+                  </div>
+                  {hashtagsChip(project)}
+                </div>
+                <div className="flex justify-between items-center text-sm text-default-500">
+                  <span>Caption limit: {project.captionLimit}</span>
+                  <span>Posts: {project.postLimit}</span>
+                </div>
+                {actions(project)}
+              </CardBody>
+            </Card>
+          ))
+        )}
+      </div>
+
+      {/* Table on md+ */}
+      <Table isStriped removeWrapper aria-label="Your projects" className="hidden md:table">
         <TableHeader>
           <TableColumn>TITLE</TableColumn>
           <TableColumn>DESCRIPTION</TableColumn>
@@ -76,69 +171,15 @@ export default function ProjectsTable() {
           <TableColumn>HASHTAGS</TableColumn>
           <TableColumn align="center">ACTIONS</TableColumn>
         </TableHeader>
-        <TableBody emptyContent="No projects yet." isLoading={isTableLoading}>
+        <TableBody emptyContent="No projects yet.">
           {projects.map((project) => (
             <TableRow key={project.id}>
               <TableCell>{project.title}</TableCell>
               <TableCell>{project.description}</TableCell>
               <TableCell>{project.captionLimit}</TableCell>
               <TableCell>{project.postLimit}</TableCell>
-              <TableCell>
-                <Chip
-                  className={`capitalize post-pro ${project.hashtags ? "text-success-700 bg-success-100" : "text-danger-500 bg-danger-100"}`}
-                  color={project.hashtags ? "success" : "danger"}
-                  size="sm"
-                  variant="flat"
-                >
-                  {project.hashtags ? "enabled" : "disabled"}
-                </Chip>
-              </TableCell>
-              <TableCell align="center">
-                <div className="relative flex justify-center items-center gap-2">
-                  <Tooltip className="text-background bg-foreground" content="View project">
-                    <Button
-                      isIconOnly
-                      variant="light"
-                      size="sm"
-                      aria-label="View project"
-                      onPress={() => router.push(`/projects/${project.id}`)}
-                      className="text-lg text-default-400"
-                    >
-                      <EyeIcon />
-                    </Button>
-                  </Tooltip>
-                  <Tooltip className="text-background bg-foreground" content="Edit project">
-                    <Button
-                      isIconOnly
-                      variant="light"
-                      size="sm"
-                      aria-label="Edit project"
-                      onPress={() => {
-                        setEditingProject(project);
-                        onEditOpen();
-                      }}
-                      className="text-lg text-default-400"
-                    >
-                      <EditIcon />
-                    </Button>
-                  </Tooltip>
-                  <Tooltip color="danger" className="post-pro bg-danger-500" content="Delete project">
-                    <Button
-                      isIconOnly
-                      variant="light"
-                      size="sm"
-                      aria-label="Delete project"
-                      onPress={() => {
-                        setDeletingProjectId(project.id);
-                        onDeleteOpen();
-                      }}
-                      className="text-lg post-pro text-danger-500"
-                    >
-                      <DeleteIcon />
-                    </Button>
-                  </Tooltip>
-                </div>
-              </TableCell>
+              <TableCell>{hashtagsChip(project)}</TableCell>
+              <TableCell align="center">{actions(project)}</TableCell>
             </TableRow>
           ))}
         </TableBody>

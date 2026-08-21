@@ -87,7 +87,7 @@ const NewProject: React.FC<NewProjectProps> = ({ params }) => {
             ) : (
               <>
                 <div className="pt-10">
-                  <div className="flex justify-between items-center">
+                  <div className="flex justify-between items-center flex-wrap gap-3">
                     <div className="flex gap-2 md:gap-5 flex-wrap">
                       <Link href="/projects" className="text-default-500">
                         <ArrowLeftIcon className="text-default-800" />

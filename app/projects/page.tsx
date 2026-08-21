@@ -16,11 +16,8 @@ const Projects: React.FC = () => {
             {/* <p>Project ID: {projectId}</p> */}
             <p className="text-default-500 pt-2">Manage all of your projects here</p>
           </div>
-          <div>
-            {/* <h2 className="text-2xl pt-10">Posts</h2> */}
-            <div className="flex flex-wrap justify-center sm:justify-start gap-4 pt-10 overflow-auto">
-              <ProjectsTable />
-            </div>
+          <div className="pt-10 w-full overflow-auto">
+            <ProjectsTable />
           </div>
         </div>
       </section>
