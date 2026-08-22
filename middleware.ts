@@ -1,16 +1,35 @@
-import { NextRequest, NextResponse } from "next/server";
-import { cookies } from "next/headers";
+import { withAuth } from "next-auth/middleware";
+import { NextResponse } from "next/server";
 
-export const middleware = async (req: NextRequest) => {
-    const token = cookies().get("postproai-token")?.value;
-    // console.log('Token: ', token);
-    if (!token && !req.nextUrl.pathname.includes('/login') && !req.nextUrl.pathname.includes('/register')) {
-        // console.log('Redirecting to login', req.nextUrl?.origin);   
-        return NextResponse.redirect(new URL("/login", req.nextUrl?.origin));
-    } else {
-        return NextResponse.next();
-    }
-}
+export default withAuth(
+  function middleware() {
+    return NextResponse.next();
+  },
+  {
+    pages: { signIn: "/login" },
+    callbacks: {
+      authorized: ({ req, token }) => {
+        // For API routes, let the request through even without a session so the
+        // route handler can return a proper 401 JSON body instead of an HTML
+        // redirect (which is what withAuth does by default on failure).
+        if (req.nextUrl.pathname.startsWith("/api")) {
+          return true;
+        }
+        return !!token;
+      },
+    },
+  }
+);
+
 export const config = {
-    matcher: ['/', '/dashboard/:path*', '/api/:path*', '/projects/:path*'],
-}
+  matcher: [
+    "/",
+    "/dashboard/:path*",
+    "/projects/:path*",
+    "/api/projects/:path*",
+    "/api/posts/:path*",
+    "/api/openai/:path*",
+    "/api/user/:path*",
+    "/api/analytics/:path*",
+  ],
+};

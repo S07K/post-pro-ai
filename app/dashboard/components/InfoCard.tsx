@@ -16,8 +16,8 @@ const InfoCard: React.FC<InfoCardProps> = ({ title, start, count, icon, bg }) =>
         <Card className={`w-full sm:w-[300px] h-[100px] text-md font-medium ${bg ? bg : ''}`}>
             <CardBody>
                 <div className='h-full flex flex-col justify-between'>
-                    <p className='text-default-50 text-sm'>{title}</p>
-                    <p className='text-default-50 text-3xl'>
+                    <p className='text-white/80 text-sm font-mono'>{title}</p>
+                    <p className='text-white text-3xl font-display'>
                         <CountUp start={start} end={count} />
                     </p>
                 </div>
