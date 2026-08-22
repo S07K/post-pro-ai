@@ -67,3 +67,23 @@ Key design notes:
 - `yarn dev` — start the dev server
 - `yarn build` — production build
 - `yarn lint` — ESLint
+- `yarn test` — run the test suite once
+- `yarn test:watch` — run tests in watch mode
+- `yarn test:coverage` — run tests with coverage
+
+## Testing
+
+Tests run against a real in-memory MongoDB (`mongodb-memory-server`) spun up
+once for the whole run — no mocking of the database layer, so the tests
+exercise actual Mongoose queries. Auth is mocked at the `requireUserId()`
+seam (`lib/api/session.ts`) rather than through full NextAuth cookies/JWTs,
+so tests can set "the current user is X" directly and focus on what this
+app's own code does with that identity — most importantly, the ownership
+scoping on projects and posts (see `tests/integration/*-ownership.test.ts`),
+which is what fixed the IDOR that existed on the old backend.
+
+- `tests/unit/` — pure logic: zod validation schemas, DTO serializers, the
+  publish/scheduling state machine (with the Meta API layer mocked)
+- `tests/integration/` — real Route Handlers called directly (no HTTP
+  server needed) against the in-memory database: registration + password
+  hashing, cross-user ownership checks, cron auth
