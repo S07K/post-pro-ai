@@ -1,31 +1,36 @@
 "use client";
-import { Card, CardBody } from '@nextui-org/react';
 import React from 'react';
 import CountUp from 'react-countup';
+
+const TONES = {
+    blue: 'bg-primary-500',
+    green: 'bg-success-500',
+    yellow: 'bg-warning-500',
+};
 
 interface InfoCardProps {
     title: string;
     start?: number;
     count: number;
     icon?: React.ReactNode;
-    bg?: string;
+    tone?: keyof typeof TONES;
 }
 
-const InfoCard: React.FC<InfoCardProps> = ({ title, start, count, icon, bg }) => {
+const InfoCard: React.FC<InfoCardProps> = ({ title, start, count, icon, tone = 'blue' }) => {
     return (
-        <Card className={`w-full sm:w-[300px] h-[100px] text-md font-medium ${bg ? bg : ''}`}>
-            <CardBody>
-                <div className='h-full flex flex-col justify-between'>
-                    <p className='text-white/80 text-sm font-mono'>{title}</p>
-                    <p className='text-white text-3xl font-display'>
-                        <CountUp start={start} end={count} />
-                    </p>
-                </div>
-                <div className='absolute top-3 right-3'>
-                    {icon ? icon : <></>}
-                </div>
-            </CardBody>
-        </Card>
+        <div className='flex items-start justify-between gap-3 rounded-lg border border-divider bg-content1 p-4'>
+            <div>
+                <p className='text-[13px] font-medium text-default-600'>{title}</p>
+                <p className='mt-2 text-[28px] font-bold leading-none text-default-900'>
+                    <CountUp start={start} end={count} separator=',' />
+                </p>
+            </div>
+            {icon && (
+                <span className={`grid h-9 w-9 shrink-0 place-items-center rounded-full text-white [&_svg]:h-5 [&_svg]:w-5 ${TONES[tone]}`}>
+                    {icon}
+                </span>
+            )}
+        </div>
     );
 };
 

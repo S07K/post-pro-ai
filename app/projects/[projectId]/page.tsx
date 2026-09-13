@@ -6,11 +6,11 @@ import toast from "react-hot-toast";
 import PostCard from "@/app/components/Card";
 import HeaderProject from "./components/HeaderProject";
 import AppShell from "@/app/components/AppShell";
+import Container from "@/app/dashboard/components/Container";
 import { Button, Spinner } from "@nextui-org/react";
 import { FacebookIcon } from "@/app/icons/FacebookIcon";
 import Script from "next/script";
 import { getProject, getProjectPosts, setProjectFacebookAccess, updateProject } from "@/lib/api/client";
-import { StaggerGrid, StaggerCell, staggerContainer, staggerItem } from "@/app/components/StaggerReveal";
 import type { ProjectDTO, PostDTO } from "@/types";
 
 interface NewProjectProps {
@@ -75,70 +75,85 @@ const NewProject: React.FC<NewProjectProps> = ({ params }) => {
     };
   }, [fetchProject, fetchPosts]);
 
-  const facebookAction = project ? (
-    project.connections.facebook ? (
-      <Button className="post-pro bg-[#1a77f2] text-white font-mono" onPress={removeConnection}>
-        <FacebookIcon /> Disconnect
-      </Button>
-    ) : (
-      <Button
-        className="post-pro bg-[#1a77f2] text-white font-mono hover:cursor-pointer"
-        onPress={() => {
-          window.FB.login(
-            (response: any) => {
-              if (response.authResponse && response.status === "connected") {
-                connectFacebook(response.authResponse.accessToken);
-              }
-            },
-            { config_id: CONFIG_ID }
-          );
-        }}
-      >
-        <FacebookIcon /> Connect Instagram
-      </Button>
-    )
-  ) : null;
+  const isConnected = Boolean(project?.connections.facebook);
 
   return (
     <>
       <AppShell
+        breadcrumbs={[{ label: "Projects", href: "/projects" }, { label: project?.title ?? "Project" }]}
         title={project?.title ?? "Project"}
         subtitle={project?.description}
-        actions={
-          project ? (
-            <>
-              {facebookAction}
-              <HeaderProject projectId={projectId} project={project} onPostCreated={fetchPosts} />
-            </>
-          ) : null
-        }
+        actions={project ? <HeaderProject projectId={projectId} project={project} onPostCreated={fetchPosts} /> : null}
       >
         {!project ? (
           <div className="flex justify-center pt-20">
             <Spinner />
           </div>
         ) : (
-          <div>
-            <h2 className="font-display text-2xl text-default-900 pt-4">Posts</h2>
-            {posts.length > 0 ? (
-              <StaggerGrid
-                variants={staggerContainer}
-                initial="hidden"
-                animate="show"
-                className="flex flex-wrap justify-center sm:justify-start gap-4 pt-6"
-              >
-                {posts.map((post) => (
-                  <StaggerCell key={post.id} variants={staggerItem}>
-                    <PostCard post={post} />
-                  </StaggerCell>
-                ))}
-              </StaggerGrid>
-            ) : (
-              <div className="h-[240px] flex flex-col flex-wrap justify-center items-center gap-4 mt-6 border hairline rounded-large">
-                <p className="text-default-500">No post in the project yet</p>
+          <>
+            <Container title="Connections" subtitle="Link an Instagram business account to publish posts from this project.">
+              <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
+                <div className="flex items-center gap-3">
+                  <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-[#1877F2] text-white">
+                    <FacebookIcon />
+                  </span>
+                  <div>
+                    <p className="text-[15px] font-semibold text-default-900">Instagram</p>
+                    <p className="flex items-center gap-1.5 text-[13px] text-default-600">
+                      <span className={`h-2 w-2 rounded-full ${isConnected ? "bg-success-500" : "bg-default-400"}`} />
+                      {isConnected ? "Connected via Facebook Login" : "Not connected"}
+                    </p>
+                  </div>
+                </div>
+                {isConnected ? (
+                  <Button variant="bordered" className="border-default-300 font-semibold text-default-800" onPress={removeConnection}>
+                    Disconnect
+                  </Button>
+                ) : (
+                  <Button
+                    className="bg-[#1877F2] font-semibold text-white"
+                    startContent={<FacebookIcon />}
+                    onPress={() => {
+                      window.FB.login(
+                        (response: any) => {
+                          if (response.authResponse && response.status === "connected") {
+                            connectFacebook(response.authResponse.accessToken);
+                          }
+                        },
+                        { config_id: CONFIG_ID }
+                      );
+                    }}
+                  >
+                    Connect Instagram
+                  </Button>
+                )}
               </div>
-            )}
-          </div>
+            </Container>
+
+            <Container title="Posts" subtitle={`${posts.length} ${posts.length === 1 ? "post" : "posts"} in this project`}>
+              {posts.length > 0 ? (
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                  {posts.map((post) => (
+                    <PostCard key={post.id} post={post} />
+                  ))}
+                </div>
+              ) : (
+                <div className="flex flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-default-300 bg-default-100 px-6 py-14 text-center">
+                  <span className="grid h-12 w-12 place-items-center rounded-full bg-primary-50 text-primary-600">
+                    <svg viewBox="0 0 24 24" className="h-6 w-6" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                      <rect x="3" y="3" width="18" height="18" rx="2" />
+                      <circle cx="8.5" cy="8.5" r="1.5" />
+                      <path d="m21 15-5-5L5 21" />
+                    </svg>
+                  </span>
+                  <p className="text-[15px] font-semibold text-default-900">No posts yet</p>
+                  <p className="max-w-sm text-sm text-default-600">
+                    Use <span className="font-semibold">Create post</span> to generate your first image and caption.
+                  </p>
+                </div>
+              )}
+            </Container>
+          </>
         )}
       </AppShell>
       <Script async defer crossOrigin="anonymous" src="https://connect.facebook.net/en_US/sdk.js" />

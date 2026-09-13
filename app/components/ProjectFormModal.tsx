@@ -95,30 +95,32 @@ export default function ProjectFormModal({ isOpen, onOpenChange, project, onSave
   };
 
   return (
-    <Modal backdrop="blur" isOpen={isOpen} onOpenChange={onOpenChange} size="lg">
+    <Modal backdrop="opaque" isOpen={isOpen} onOpenChange={onOpenChange} size="lg">
       <ModalContent className="text-default-800">
         {(onClose) => (
           <>
-            <ModalHeader className="flex flex-col gap-1">{isEdit ? "Edit Project" : "Create New Project"}</ModalHeader>
-            <ModalBody>
+            <ModalHeader className="border-b border-divider text-[17px]">{isEdit ? "Edit project" : "Create project"}</ModalHeader>
+            <ModalBody className="gap-5 py-5">
               <Input
                 isRequired
                 name="title"
                 value={values.title}
                 onChange={handleChange}
                 type="text"
-                variant="underlined"
-                label="Choose a topic"
-                description="Enter a topic you want to post on."
+                variant="bordered"
+                label="Topic"
+                labelPlacement="outside"
+                placeholder="e.g. Weekend travel tips"
+                description="The topic you want to post about."
               />
               <Textarea
                 name="description"
                 value={values.description}
                 onChange={handleChange}
-                variant="underlined"
-                description="Enter a description for your project."
+                variant="bordered"
+                label="Description"
                 labelPlacement="outside"
-                placeholder="Enter project description"
+                placeholder="What is this project about?"
               />
               <div className="grid grid-cols-2 gap-4">
                 <Input
@@ -128,9 +130,11 @@ export default function ProjectFormModal({ isOpen, onOpenChange, project, onSave
                   max={2200}
                   onChange={handleChange}
                   type="number"
-                  variant="underlined"
-                  label="Caption Limit"
-                  description="Enter a limit for your post caption."
+                  variant="bordered"
+                  label="Caption limit"
+                  labelPlacement="outside"
+                  placeholder="100"
+                  description="Maximum caption characters."
                 />
                 <Input
                   name="postLimit"
@@ -139,20 +143,22 @@ export default function ProjectFormModal({ isOpen, onOpenChange, project, onSave
                   max={1000}
                   onChange={handleChange}
                   type="number"
-                  variant="underlined"
-                  label="No. of post"
-                  description="Enter how many post you want to generate."
+                  variant="bordered"
+                  label="No. of posts"
+                  labelPlacement="outside"
+                  placeholder="10"
+                  description="Posts to generate."
                 />
               </div>
               <Checkbox isSelected={values.hashtags} name="hashtags" onValueChange={(checked) => setValues((prev) => ({ ...prev, hashtags: checked }))}>
-                Add hashtags?
+                <span className="text-sm">Add hashtags to captions</span>
               </Checkbox>
             </ModalBody>
-            <ModalFooter>
-              <Button className="text-default-800 post-pro bg-primary-100" variant="light" onPress={onClose}>
+            <ModalFooter className="border-t border-divider">
+              <Button className="bg-default-200 font-semibold text-default-800" onPress={onClose}>
                 Cancel
               </Button>
-              <Button className="post-pro bg-primary-500 text-default-50" onPress={handleSubmit} isLoading={isSaving}>
+              <Button color="primary" className="font-semibold" onPress={handleSubmit} isLoading={isSaving}>
                 Save
               </Button>
             </ModalFooter>

@@ -15,11 +15,10 @@ import {
   TableCell,
   Chip,
   Tooltip,
-  Card,
-  CardBody,
   Skeleton,
   useDisclosure,
 } from "@nextui-org/react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import { EyeIcon } from "@/app/icons/EyeIcon";
@@ -79,32 +78,33 @@ export default function ProjectsTable() {
   };
 
   const actions = (project: ProjectDTO) => (
-    <div className="relative flex justify-center items-center gap-2">
-      <Tooltip className="text-background bg-foreground" content="View project">
+    <div className="relative flex items-center justify-center gap-1">
+      <Tooltip className="bg-foreground text-background" content="View project">
         <Button
           isIconOnly
           variant="light"
           size="sm"
           aria-label="View project"
           onPress={() => router.push(`/projects/${project.id}`)}
-          className="text-lg text-default-400"
+          className="text-lg text-default-600"
         >
           <EyeIcon />
         </Button>
       </Tooltip>
-      <Tooltip className="text-background bg-foreground" content="Edit project">
-        <Button isIconOnly variant="light" size="sm" aria-label="Edit project" onPress={() => openEdit(project)} className="text-lg text-default-400">
+      <Tooltip className="bg-foreground text-background" content="Edit project">
+        <Button isIconOnly variant="light" size="sm" aria-label="Edit project" onPress={() => openEdit(project)} className="text-lg text-default-600">
           <EditIcon />
         </Button>
       </Tooltip>
-      <Tooltip color="danger" className="post-pro bg-danger-500" content="Delete project">
+      <Tooltip className="bg-foreground text-background" content="Delete project">
         <Button
           isIconOnly
           variant="light"
+          color="danger"
           size="sm"
           aria-label="Delete project"
           onPress={() => openDelete(project.id)}
-          className="text-lg post-pro text-danger-500"
+          className="text-lg"
         >
           <DeleteIcon />
         </Button>
@@ -113,21 +113,23 @@ export default function ProjectsTable() {
   );
 
   const hashtagsChip = (project: ProjectDTO) => (
-    <Chip
-      className={`capitalize post-pro ${project.hashtags ? "text-success-700 bg-success-100" : "text-danger-500 bg-danger-100"}`}
-      color={project.hashtags ? "success" : "danger"}
-      size="sm"
-      variant="flat"
-    >
-      {project.hashtags ? "enabled" : "disabled"}
+    <Chip color={project.hashtags ? "success" : "default"} size="sm" radius="sm" variant="flat" classNames={{ content: "font-semibold" }}>
+      {project.hashtags ? "Enabled" : "Disabled"}
     </Chip>
+  );
+
+  const emptyState = (
+    <div className="px-6 py-10 text-center">
+      <p className="text-[15px] font-semibold text-default-900">No projects yet</p>
+      <p className="mt-1 text-sm text-default-600">Use Create project to add your first one.</p>
+    </div>
   );
 
   if (isTableLoading) {
     return (
-      <div className="w-full flex flex-col gap-3">
+      <div className="flex flex-col gap-3 rounded-lg border border-divider bg-content1 p-4 shadow-card">
         {[...Array(3)].map((_, i) => (
-          <Skeleton key={i} className="rounded-lg h-16 w-full" />
+          <Skeleton key={i} className="h-12 w-full rounded-md" />
         ))}
       </div>
     );
@@ -136,54 +138,70 @@ export default function ProjectsTable() {
   return (
     <>
       {/* Card list on small screens */}
-      <div className="w-full flex flex-col gap-3 md:hidden">
+      <div className="flex flex-col gap-3 md:hidden">
         {projects.length === 0 ? (
-          <p className="text-default-500 py-6 text-center w-full">No projects yet.</p>
+          <div className="rounded-lg border border-divider bg-content1">{emptyState}</div>
         ) : (
           projects.map((project) => (
-            <Card key={project.id} className="w-full">
-              <CardBody className="gap-2">
-                <div className="flex justify-between items-start gap-2">
-                  <div>
-                    <p className="font-semibold text-default-900">{project.title}</p>
-                    <p className="text-default-500 text-sm">{project.description}</p>
-                  </div>
-                  {hashtagsChip(project)}
+            <div key={project.id} className="flex flex-col gap-3 rounded-lg border border-divider bg-content1 p-4 shadow-card">
+              <div className="flex items-start justify-between gap-2">
+                <div className="min-w-0">
+                  <Link href={`/projects/${project.id}`} className="font-semibold text-primary-600 hover:underline">
+                    {project.title}
+                  </Link>
+                  {project.description ? <p className="mt-0.5 text-sm text-default-600">{project.description}</p> : null}
                 </div>
-                <div className="flex justify-between items-center text-sm text-default-500">
-                  <span>Caption limit: {project.captionLimit}</span>
-                  <span>Posts: {project.postLimit}</span>
-                </div>
+                {hashtagsChip(project)}
+              </div>
+              <div className="flex items-center justify-between border-t border-divider pt-2 text-[13px] text-default-600">
+                <span>Caption limit: {project.captionLimit}</span>
+                <span>Posts: {project.postLimit}</span>
                 {actions(project)}
-              </CardBody>
-            </Card>
+              </div>
+            </div>
           ))
         )}
       </div>
 
       {/* Table on md+ */}
-      <Table isStriped removeWrapper aria-label="Your projects" className="hidden md:table">
-        <TableHeader>
-          <TableColumn>TITLE</TableColumn>
-          <TableColumn>DESCRIPTION</TableColumn>
-          <TableColumn>CAPTION LIMIT</TableColumn>
-          <TableColumn>NO. OF POSTS</TableColumn>
-          <TableColumn>HASHTAGS</TableColumn>
-          <TableColumn align="center">ACTIONS</TableColumn>
-        </TableHeader>
-        <TableBody emptyContent="No projects yet.">
-          {projects.map((project) => (
-            <TableRow key={project.id}>
-              <TableCell>{project.title}</TableCell>
-              <TableCell>{project.description}</TableCell>
-              <TableCell>{project.captionLimit}</TableCell>
-              <TableCell>{project.postLimit}</TableCell>
-              <TableCell>{hashtagsChip(project)}</TableCell>
-              <TableCell align="center">{actions(project)}</TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+      <div className="hidden overflow-x-auto rounded-lg border border-divider bg-content1 p-4 shadow-card md:block">
+        <Table
+          removeWrapper
+          aria-label="Your projects"
+          classNames={{
+            th: "bg-default-100 text-xs font-semibold uppercase tracking-wide text-default-600",
+            td: "border-b border-divider py-3 text-sm text-default-800",
+            tr: "transition-colors hover:bg-default-100",
+          }}
+        >
+          <TableHeader>
+            <TableColumn>Title</TableColumn>
+            <TableColumn>Description</TableColumn>
+            <TableColumn>Caption limit</TableColumn>
+            <TableColumn>No. of posts</TableColumn>
+            <TableColumn>Hashtags</TableColumn>
+            <TableColumn align="center">Actions</TableColumn>
+          </TableHeader>
+          <TableBody emptyContent={emptyState}>
+            {projects.map((project) => (
+              <TableRow key={project.id}>
+                <TableCell>
+                  <Link href={`/projects/${project.id}`} className="font-semibold text-primary-600 hover:underline">
+                    {project.title}
+                  </Link>
+                </TableCell>
+                <TableCell>
+                  <p className="max-w-[320px] truncate text-default-600">{project.description || "—"}</p>
+                </TableCell>
+                <TableCell>{project.captionLimit}</TableCell>
+                <TableCell>{project.postLimit}</TableCell>
+                <TableCell>{hashtagsChip(project)}</TableCell>
+                <TableCell align="center">{actions(project)}</TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
 
       <ProjectFormModal
         isOpen={isEditOpen}
@@ -193,18 +211,20 @@ export default function ProjectsTable() {
         onSaved={loadProjects}
       />
 
-      <Modal backdrop="blur" isOpen={isDeleteOpen} onOpenChange={onDeleteOpenChange} size="lg">
+      <Modal backdrop="opaque" isOpen={isDeleteOpen} onOpenChange={onDeleteOpenChange} size="md">
         <ModalContent className="text-default-800">
           {(onClose) => (
             <>
-              <ModalHeader className="flex flex-col gap-1">Delete Project</ModalHeader>
-              <ModalBody>Are you sure? This will also delete all posts in this project.</ModalBody>
-              <ModalFooter>
-                <Button className="text-default-800 post-pro bg-primary-100" variant="light" onPress={onClose}>
+              <ModalHeader className="border-b border-divider text-[17px]">Delete project?</ModalHeader>
+              <ModalBody className="py-4 text-[15px] text-default-700">
+                This will permanently delete the project and all of its posts. This can&apos;t be undone.
+              </ModalBody>
+              <ModalFooter className="border-t border-divider">
+                <Button className="bg-default-200 font-semibold text-default-800" onPress={onClose}>
                   Cancel
                 </Button>
-                <Button className="post-pro bg-danger-500 text-default-50" onPress={handleDelete} isLoading={isDeleting}>
-                  Yes, delete
+                <Button color="danger" className="font-semibold" onPress={handleDelete} isLoading={isDeleting}>
+                  Delete
                 </Button>
               </ModalFooter>
             </>

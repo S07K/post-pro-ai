@@ -13,7 +13,7 @@ export default function ThemeToggle({ className = "text-default-500" }: { classN
   useEffect(() => setMounted(true), []);
 
   if (!mounted) {
-    return <div className="w-10 h-10" />;
+    return <div className="w-8 h-8" />;
   }
 
   const isDark = theme === "dark";
@@ -23,6 +23,7 @@ export default function ThemeToggle({ className = "text-default-500" }: { classN
       isIconOnly
       variant="light"
       size="sm"
+      radius="full"
       aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
       onPress={() => setTheme(isDark ? "light" : "dark")}
       className={className}

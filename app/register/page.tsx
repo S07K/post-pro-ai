@@ -1,34 +1,27 @@
 "use client";
 import React, { useState } from "react";
-import { motion } from "framer-motion";
-import { Button, Input, Link } from "@nextui-org/react";
+import { Button, Input } from "@nextui-org/react";
+import NextLink from "next/link";
 import { useRouter } from "next/navigation";
 import toast, { Toaster } from "react-hot-toast";
 import { register } from "@/lib/api/client";
-import AuthCard, { authCardItem } from "../components/AuthCard";
+import AuthCard from "../components/AuthCard";
 
 const Register: React.FC = () => {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [passwordError, setPasswordError] = useState("");
-  const [confirmPassword, setConfirmPasswordChange] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [formError, setFormError] = useState("");
   const [isRegistering, setIsRegistering] = useState(false);
 
-  const handleEmailChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setEmail(event.target.value);
-  };
-
-  const handlePasswordChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setPassword(event.target.value);
-  };
-  const handleConfirmPasswordChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleConfirmPasswordChange = (value: string) => {
     setPasswordError("");
-    setConfirmPasswordChange(event.target.value);
+    setConfirmPassword(value);
   };
 
-  const handleSubmit = async (event: React.FormEvent | React.MouseEvent) => {
+  const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     if (!email || !password || !confirmPassword) {
       setFormError("Please fill in all fields");
@@ -61,41 +54,58 @@ const Register: React.FC = () => {
   return (
     <>
       <Toaster />
-      <AuthCard eyebrow="Get started" title="Create your account">
-        <div className="flex flex-col gap-4">
+      <AuthCard title="Create a new account" subtitle="It's quick and easy.">
+        <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-4">
           {formError && (
-            <motion.div variants={authCardItem} className="text-danger-500 text-sm">
+            <div role="alert" className="rounded-md border border-danger-200 bg-danger-50 px-3 py-2 text-sm text-danger-700">
               {formError}
-            </motion.div>
+            </div>
           )}
-          <motion.div variants={authCardItem}>
-            <Input label="Email" variant="bordered" value={email} onChange={handleEmailChange} />
-          </motion.div>
-          <motion.div variants={authCardItem}>
-            <Input label="Password" type="password" variant="bordered" value={password} onChange={handlePasswordChange} />
-          </motion.div>
-          <motion.div variants={authCardItem}>
-            <Input
-              label="Confirm Password"
-              isInvalid={Boolean(passwordError)}
-              errorMessage={passwordError}
-              type="password"
-              variant="bordered"
-              value={confirmPassword}
-              onChange={handleConfirmPasswordChange}
-            />
-          </motion.div>
-          <motion.div variants={authCardItem}>
-            <Link href="/login" size="sm" className="font-mono text-primary-500">
-              Already have an account?
-            </Link>
-          </motion.div>
-          <motion.div variants={authCardItem}>
-            <Button className="w-full post-pro bg-primary-500 text-primary-50 font-mono" onClick={handleSubmit} isLoading={isRegistering}>
+          <Input
+            autoFocus
+            type="email"
+            autoComplete="email"
+            label="Email address"
+            labelPlacement="outside"
+            placeholder="you@company.com"
+            variant="bordered"
+            size="lg"
+            value={email}
+            onValueChange={setEmail}
+          />
+          <Input
+            type="password"
+            autoComplete="new-password"
+            label="Password"
+            labelPlacement="outside"
+            placeholder="At least 8 characters"
+            variant="bordered"
+            size="lg"
+            value={password}
+            onValueChange={setPassword}
+          />
+          <Input
+            type="password"
+            autoComplete="new-password"
+            label="Confirm password"
+            labelPlacement="outside"
+            placeholder="Re-enter your password"
+            variant="bordered"
+            size="lg"
+            isInvalid={Boolean(passwordError)}
+            errorMessage={passwordError}
+            value={confirmPassword}
+            onValueChange={handleConfirmPasswordChange}
+          />
+          <div className="flex justify-center pt-1">
+            <Button type="submit" color="success" size="lg" isLoading={isRegistering} className="min-w-[194px] text-[17px] font-semibold">
               Sign up
             </Button>
-          </motion.div>
-        </div>
+          </div>
+          <NextLink href="/login" className="text-center text-sm text-primary-600 hover:underline">
+            Already have an account?
+          </NextLink>
+        </form>
       </AuthCard>
     </>
   );
