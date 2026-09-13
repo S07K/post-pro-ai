@@ -13,7 +13,7 @@ A single full-stack Next.js 14 (App Router) application — API routes, MongoDB/
 - **Storage:** Firebase Storage (generated post images)
 - **AI:** OpenAI (DALL-E-3), server-side key only
 - **Publishing:** Meta Graph API (Instagram business accounts via a connected Facebook Page)
-- **Scheduling:** Vercel Cron (`vercel.json`) publishes scheduled posts and resumes any left mid-publish
+- **Scheduling:** Vercel Cron (`vercel.json`) publishes scheduled posts and resumes any left mid-publish. It runs once a day (09:00 UTC) to stay within the Vercel Hobby plan, so a scheduled post goes out at the next daily run after its scheduled time
 
 ## Getting started
 
