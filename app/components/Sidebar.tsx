@@ -52,7 +52,7 @@ const NAV_GROUPS: { title?: string; items: NavItem[] }[] = [
   },
   {
     title: "Tools",
-    items: [{ label: "Insights", href: "/#analytics", icon: <InsightsIcon />, isActive: () => false }],
+    items: [{ label: "Insights", href: "/insights", icon: <InsightsIcon />, isActive: (p) => p.startsWith("/insights") }],
   },
 ];
 
