@@ -3,6 +3,9 @@ import User from "@/lib/db/models/user";
 import { requireUserId } from "@/lib/api/session";
 import { ok, unauthorized, notFound, serverError } from "@/lib/api/respond";
 
+// Reads the session from request headers, so it must never be prerendered at build time
+export const dynamic = "force-dynamic";
+
 export async function GET() {
   try {
     const userId = await requireUserId();
