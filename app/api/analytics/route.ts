@@ -4,6 +4,9 @@ import Project from "@/lib/db/models/project";
 import { requireUserId } from "@/lib/api/session";
 import { ok, unauthorized, serverError } from "@/lib/api/respond";
 
+// Reads the session from request headers, so it must never be prerendered at build time
+export const dynamic = "force-dynamic";
+
 const WEEKS = 8;
 const MS_PER_WEEK = 7 * 24 * 60 * 60 * 1000;
 

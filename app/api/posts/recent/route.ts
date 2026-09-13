@@ -4,6 +4,9 @@ import { requireUserId } from "@/lib/api/session";
 import { toPostDTO } from "@/lib/api/serializers";
 import { ok, unauthorized, serverError } from "@/lib/api/respond";
 
+// Reads the session from request headers, so it must never be prerendered at build time
+export const dynamic = "force-dynamic";
+
 /** Recent posts across every project owned by the authenticated user, for the dashboard history feed. */
 export async function GET(req: Request) {
   try {

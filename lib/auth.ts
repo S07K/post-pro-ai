@@ -25,13 +25,21 @@ export const authOptions: AuthOptions = {
         const { email, password } = parsed.data;
 
         await connectDB();
-        const user = await User.findOne({ email });
+        // Case-insensitive match: accounts created by the old Express backend weren't lowercased
+        const user = await User.findOne({ email }).collation({ locale: "en", strength: 2 });
         if (!user) {
+          console.warn("[auth] sign-in failed: no user with that email in database", User.db.name);
+          return null;
+        }
+
+        if (!/^\$2[aby]\$/.test(user.password)) {
+          console.warn("[auth] sign-in failed: stored password is not a bcrypt hash");
           return null;
         }
 
         const isValid = await bcrypt.compare(password, user.password);
         if (!isValid) {
+          console.warn("[auth] sign-in failed: password does not match");
           return null;
         }
 
