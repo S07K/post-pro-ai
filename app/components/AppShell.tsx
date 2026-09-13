@@ -80,7 +80,7 @@ export default function AppShell({ title, subtitle, breadcrumbs, actions, childr
                 <DropdownItem key="projects" href="/projects">
                   Projects
                 </DropdownItem>
-                <DropdownItem key="insights" href="/#analytics">
+                <DropdownItem key="insights" href="/insights">
                   Insights
                 </DropdownItem>
                 <DropdownItem key="logout" color="danger" className="text-danger" onPress={() => signOut({ callbackUrl: "/login" })}>

@@ -19,7 +19,16 @@ const Dashboard: React.FC = () => {
       >
         <CardsContainer />
       </Container>
-      <Container id="analytics" title="Insights" subtitle="Based on the posts across all of your projects.">
+      <Container
+        id="analytics"
+        title="Insights"
+        subtitle="Based on the posts across all of your projects."
+        action={
+          <Link href="/insights" className="text-sm font-semibold text-primary-600 hover:underline">
+            Open Insights
+          </Link>
+        }
+      >
         <Analytics />
       </Container>
     </AppShell>

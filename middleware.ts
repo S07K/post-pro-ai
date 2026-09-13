@@ -26,6 +26,7 @@ export const config = {
     "/",
     "/dashboard/:path*",
     "/projects/:path*",
+    "/insights/:path*",
     "/api/projects/:path*",
     "/api/posts/:path*",
     "/api/openai/:path*",
