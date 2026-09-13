@@ -1,23 +1,33 @@
-import { ENDPOINT } from "@/app/lib/utils";
-import axios from "axios";
-import { cookies } from "next/headers";
+import { connectDB } from "@/lib/db/mongoose";
+import User from "@/lib/db/models/user";
+import { requireUserId } from "@/lib/api/session";
+import { ok, unauthorized, notFound, serverError } from "@/lib/api/respond";
 
-export const GET = async (req: Request, res: Response) => {
-    const token = cookies().get("postproai-token")?.value;
-    try {
-        const response = await axios.get(`${ENDPOINT}/user`, {
-            headers: {
-                Authorization: `Bearer ${token}`
-            }
-        });
-        if(response.data.status === "success") {
-            return new Response(JSON.stringify(response.data));
-        } else {
-            console.error('Error calling get all project api: ', response.data.message);
-            return new Response(JSON.stringify(response.data));
-        }
-    } catch (error: any) {
-        console.error('Error calling get all project api: ', error);
-        return new Response(JSON.stringify(error));
+export async function GET() {
+  try {
+    const userId = await requireUserId();
+    if (!userId) {
+      return unauthorized();
     }
+
+    await connectDB();
+    const user = await User.findById(userId);
+    if (!user) {
+      return notFound("User not found");
+    }
+
+    return ok({
+      status: "success",
+      user: {
+        username: user.username,
+        email: user.email,
+        profilePic: user.profilePic,
+        bio: user.bio,
+        verified: user.verified,
+        createdAt: user.createdAt,
+      },
+    });
+  } catch (error) {
+    return serverError(error, "Failed to load user");
+  }
 }

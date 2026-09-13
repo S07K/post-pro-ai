@@ -1,58 +1,61 @@
-import PostCard from "./Card";
+"use client";
+import React, { useEffect, useState } from "react";
+import toast from "react-hot-toast";
+import { Card, CardBody, CardFooter, Skeleton } from "@nextui-org/react";
+import PostCard from "../../components/Card";
+import { getRecentPosts } from "@/lib/api/client";
+import { StaggerGrid, StaggerCell, staggerContainer, staggerItem } from "../../components/StaggerReveal";
+import type { PostDTO } from "@/types";
 
-const Cards = [
-    {
-        id: 1,
-        caption: "🌄✨ Just when you think you've seen it all, nature unveils its masterpiece! This breathtaking view captures the grandeur of towering peaks, their snow-capped summits glistening under the golden rays of the sun.",
-        image: "https://plus.unsplash.com/premium_photo-1676218968741-8179dd7e533f?q=80&w=2970&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-        likes: 10,
-        comments: 3,
-        shares: 4
-    },
-    {
-        id: 2,
-        caption: "🌊✨ Dive into the captivating beauty of the sea! This stunning photo captures the shimmering waves as they dance under the sun, creating a mesmerizing palette of blues and greens.",
-        image: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=2973&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-        likes: 10,
-        comments: 3,
-        shares: 4
-    },
-    {
-        id: 3,
-        caption: "🏔️✨ Standing atop this majestic mountain, I'm greeted by a breathtaking panorama that stretches as far as the eye can see. The crisp mountain air fills my lungs, invigorating my spirit as I take in the stunning landscape below. ",
-        image: "https://plus.unsplash.com/premium_photo-1676139859069-c67c27d3abb9?q=80&w=2970&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-        likes: 10,
-        comments: 3,
-        shares: 4
-    },
-    {
-        id: 4,
-        caption: "Times Square, the iconic intersection of Broadway, 7th Avenue, and 42nd Street in New York City, is a must-visit destination for anyone exploring the Big Apple.",
-        image: "https://images.unsplash.com/photo-1564715474218-1c628825ffc2?q=80&w=3087&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-        likes: 10,
-        comments: 3,
-        shares: 4
-    },
-    {
-        id: 5,
-        caption: "🏔️❄️ Imagine a world blanketed in pristine white, where the only sounds are the crunch of snow beneath your feet and the gentle whisper of the wind.",
-        image: "https://images.unsplash.com/photo-1526991757821-1307bf7800f6?q=80&w=2970&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-        likes: 10,
-        comments: 3,
-        shares: 4
-    }
-]
+function CardSkeleton() {
+  return (
+    <Card className="py-1 w-[300px]">
+      <CardBody className="overflow-visible py-2">
+        <Skeleton className="rounded-xl w-[300px] h-[200px]" />
+      </CardBody>
+      <CardFooter className="flex flex-col items-start gap-2 pt-0">
+        <Skeleton className="rounded-full w-16 h-5" />
+        <Skeleton className="rounded-lg w-full h-4" />
+      </CardFooter>
+    </Card>
+  );
+}
 
 const CardsContainer: React.FC = () => {
+  const [posts, setPosts] = useState<PostDTO[] | null>(null);
+
+  useEffect(() => {
+    getRecentPosts()
+      .then(setPosts)
+      .catch(() => {
+        setPosts([]);
+        toast.error("Failed to load recent posts");
+      });
+  }, []);
+
+  if (posts === null) {
     return (
-        <div className="flex overflow-auto hide-scroll gap-6 pt-4">
-            {
-                Cards.map((card) => (
-                    <PostCard key={card.id} cardDetails={card} />
-                ))
-            }
-        </div>
+      <div className="flex overflow-auto hide-scroll gap-6 pt-4">
+        {[...Array(3)].map((_, i) => (
+          <CardSkeleton key={i} />
+        ))}
+      </div>
     );
+  }
+
+  if (posts.length === 0) {
+    return <p className="pt-4 text-default-500">No posts yet. Create a project and generate your first post to see it here.</p>;
+  }
+
+  return (
+    <StaggerGrid variants={staggerContainer} initial="hidden" animate="show" className="flex overflow-auto hide-scroll gap-6 pt-4">
+      {posts.map((post) => (
+        <StaggerCell key={post.id} variants={staggerItem}>
+          <PostCard post={post} />
+        </StaggerCell>
+      ))}
+    </StaggerGrid>
+  );
 };
 
 export default CardsContainer;

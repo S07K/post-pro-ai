@@ -1,39 +1,46 @@
-import { ENDPOINT } from '@/app/lib/utils';
-import axios from 'axios';
-import { cookies } from 'next/headers';
-import { NextRequest, NextResponse } from 'next/server';
+import { connectDB } from "@/lib/db/mongoose";
+import Project from "@/lib/db/models/project";
+import { createProjectSchema } from "@/lib/validation/project";
+import { requireUserId } from "@/lib/api/session";
+import { toProjectDTO } from "@/lib/api/serializers";
+import { ok, unauthorized, fail, validationError, serverError } from "@/lib/api/respond";
 
-export const GET = async (req: Request, res: Response) => {
-    const token = cookies().get("postproai-token")?.value;
-    try {
-        const response = await axios.get(`${ENDPOINT}/projects/getAllProjects`, {
-            headers: {
-                Authorization: `Bearer ${token}`
-            }
-        });
-        if(response.data.status === "success") {
-            return new Response(JSON.stringify(response.data));
-        } else {
-            console.error('Error calling get all project api: ', response.data.message);
-            return new Response(JSON.stringify(response.data));
-        }
-    } catch (error: any) {
-        console.error('Error calling get all project api: ', error);
-        return new Response(JSON.stringify(error));
+export async function GET() {
+  try {
+    const userId = await requireUserId();
+    if (!userId) {
+      return unauthorized();
     }
+
+    await connectDB();
+    const projects = await Project.find({ userId }).sort({ createdAt: -1 });
+    return ok({ status: "success", projects: projects.map((p) => toProjectDTO(p)) });
+  } catch (error) {
+    return serverError(error, "Failed to load projects");
+  }
 }
-export const POST = async (req: Request, res: Response) => {
-    const token = cookies().get("postproai-token")?.value;
-    try {
-        const payload = await req.json()
-        const response = await axios.post(`${ENDPOINT}/projects/create`, payload, {
-            headers: {
-                Authorization: `Bearer ${token}`
-            }
-        });
-        return new Response(JSON.stringify(response.data));
-    } catch (error: any) {
-        console.error('Error calling create project api: ', error);
-        return new Response(JSON.stringify(error));
+
+export async function POST(req: Request) {
+  try {
+    const userId = await requireUserId();
+    if (!userId) {
+      return unauthorized();
     }
+
+    const parsed = createProjectSchema.safeParse(await req.json());
+    if (!parsed.success) {
+      return validationError(parsed.error);
+    }
+
+    await connectDB();
+    const existing = await Project.findOne({ userId, title: parsed.data.title });
+    if (existing) {
+      return fail("A project with this title already exists", 409);
+    }
+
+    const project = await Project.create({ ...parsed.data, userId });
+    return ok({ status: "success", project: toProjectDTO(project) });
+  } catch (error) {
+    return serverError(error, "Failed to create project");
+  }
 }

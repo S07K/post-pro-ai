@@ -7,30 +7,43 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "ngrok": "ngrok http 3000"
+    "ngrok": "ngrok http 3000",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
     "@nextui-org/react": "^2.4.6",
     "@types/facebook-js-sdk": "^3.3.12",
-    "axios": "^1.7.7",
+    "axios": "^1.19.0",
+    "bcryptjs": "^3.0.3",
     "facebook-js-sdk": "^0.3.4",
+    "firebase": "^12.18.0",
     "framer-motion": "^11.3.21",
+    "mongoose": "^9.9.3",
     "next": "14.2.5",
+    "next-auth": "^4",
+    "next-themes": "^0.4.6",
     "ngrok": "^5.0.0-beta.2",
     "react": "^18",
     "react-countup": "^6.5.3",
     "react-dom": "^18",
     "react-hot-toast": "^2.4.1",
-    "recharts": "^2.13.0-alpha.4"
+    "recharts": "^2.13.0-alpha.4",
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
+    "@vitest/coverage-v8": "^4.1.11",
     "eslint": "^8",
     "eslint-config-next": "14.2.5",
+    "mongodb-memory-server": "^11.2.0",
     "postcss": "^8",
     "tailwindcss": "^3.4.1",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vite-tsconfig-paths": "^6.1.1",
+    "vitest": "^4.1.11"
   }
 }

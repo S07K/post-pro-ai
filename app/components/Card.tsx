@@ -2,12 +2,10 @@
 import React, { useState } from "react";
 import {
   Card,
-  CardHeader,
   CardBody,
   Image,
   CardFooter,
-  Avatar,
-  card,
+  Chip,
   Modal,
   ModalContent,
   ModalHeader,
@@ -16,85 +14,80 @@ import {
   Button,
   useDisclosure,
 } from "@nextui-org/react";
-import PostOption from "./PostOption";
-import { HeartIcon } from "../icons/HeartIcon";
-import { CommentIcon } from "../icons/CommentIcon";
-import { ShareIcon } from "../icons/ShareIcon";
+import type { PostDTO } from "@/types";
 
-export default function PostCard({ cardDetails, fullView, isClickable = true }: { cardDetails: any; fullView?: boolean; isClickable?: boolean }) {
-  const {isOpen, onOpen, onOpenChange} = useDisclosure();
-  const [isActive, setIsActive]: any = useState(null);
+const STATUS_LABEL: Record<PostDTO["status"], string> = {
+  draft: "Draft",
+  scheduled: "Scheduled",
+  processing: "Processing",
+  posted: "Posted",
+  failed: "Failed",
+};
 
-  const handleClick = () => {
-    onOpen();
-    setIsActive(<PostCard fullView={true} cardDetails={cardDetails} isClickable={false} />);
-  };
-  
+const STATUS_COLOR: Record<PostDTO["status"], "default" | "primary" | "success" | "danger" | "warning"> = {
+  draft: "default",
+  scheduled: "primary",
+  processing: "warning",
+  posted: "success",
+  failed: "danger",
+};
+
+export default function PostCard({ post, fullView, isClickable = true }: { post: PostDTO; fullView?: boolean; isClickable?: boolean }) {
+  const { isOpen, onOpen, onOpenChange } = useDisclosure();
+
   return (
-    <div onClick={isClickable ? () => {handleClick()} : () => {}} className="hover:cursor-pointer">
-      <Card className="py-1 w-[300px]">
-        {/* <CardHeader className="pt-0 pb-1">
-            <div className="flex gap-5">
-              <Avatar
-                isBordered
-                radius="full"
-                size="md"
-                src="https://nextui.org/avatars/avatar-1.png"
-              />
-              <div className="flex flex-col gap-1 items-start justify-center">
-                <h4 className="text-small font-semibold leading-none text-default-600">
-                  Zoey Lang
-                </h4>
-                <h5 className="text-small tracking-tight text-default-400">
-                  @zoeylang
-                </h5>
-              </div>
-            </div>
-          </CardHeader> */}
+    <div>
+      <Card
+        className="py-1 w-[300px]"
+        isPressable={isClickable}
+        onPress={isClickable ? onOpen : undefined}
+      >
         <CardBody className="overflow-visible py-2 max-h-[300px]">
           <Image
-            alt="Card background"
+            alt={post.caption || "Generated post image"}
             className="object-cover rounded-xl"
-            src={cardDetails.image}
+            src={post.image}
             width={!fullView ? 300 : "100%"}
             height={!fullView ? 200 : "auto"}
           />
         </CardBody>
-        <CardFooter className="flex flex-col items-start pt-0">
-          <div className="flex">
-            <PostOption icon={<HeartIcon />} count={cardDetails.likes || 0} />
-            <PostOption icon={<CommentIcon />} count={cardDetails.comments || 0} />
-            <PostOption icon={<ShareIcon />} count={cardDetails.shares || 0} />
-          </div>
-          <small className={`text-default-800 webkit-box ${!fullView ? 'webkit-line-clamp-2' : ''} webkit-box-orient-vertical overflow-hidden`}>
-            {cardDetails.caption}
-          </small>
+        <CardFooter className="flex flex-col items-start gap-2 pt-0">
+          <Chip size="sm" color={STATUS_COLOR[post.status]} variant="flat">
+            {STATUS_LABEL[post.status]}
+          </Chip>
+          {post.caption ? (
+            <small
+              className={`text-default-800 webkit-box ${!fullView ? "webkit-line-clamp-2" : ""} webkit-box-orient-vertical overflow-hidden`}
+            >
+              {post.caption}
+            </small>
+          ) : null}
+          {post.status === "failed" && post.failureReason ? (
+            <small className="text-danger-500">{post.failureReason}</small>
+          ) : null}
         </CardFooter>
       </Card>
-      <Modal backdrop={"blur"} isOpen={isOpen} onOpenChange={onOpenChange}>
-        <ModalContent className="text-default-800">
-          {(onClose) => (
-            <>
-              <ModalHeader className="flex flex-col gap-1">
-                View post
-              </ModalHeader>
-              <ModalBody>
-                <div className="flex justify-center items-center">
-                  {isActive}
-                </div>
-              </ModalBody>
-              <ModalFooter>
-                <Button className="text-default-800 post-pro bg-primary-100" variant="light" onPress={onClose}>
-                  Close
-                </Button>
-                {/* <Button className="post-pro bg-primary-500 text-default-50" onPress={onClose}>
-                  Edit
-                </Button> */}
-              </ModalFooter>
-            </>
-          )}
-        </ModalContent>
-      </Modal>
+      {isClickable ? (
+        <Modal backdrop="blur" isOpen={isOpen} onOpenChange={onOpenChange}>
+          <ModalContent className="text-default-800">
+            {(onClose) => (
+              <>
+                <ModalHeader className="flex flex-col gap-1">View post</ModalHeader>
+                <ModalBody>
+                  <div className="flex justify-center items-center">
+                    <PostCard post={post} fullView isClickable={false} />
+                  </div>
+                </ModalBody>
+                <ModalFooter>
+                  <Button className="text-default-800 post-pro bg-primary-100" variant="light" onPress={onClose}>
+                    Close
+                  </Button>
+                </ModalFooter>
+              </>
+            )}
+          </ModalContent>
+        </Modal>
+      ) : null}
     </div>
   );
 }
