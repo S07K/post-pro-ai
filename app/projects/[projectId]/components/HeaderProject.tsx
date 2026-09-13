@@ -1,5 +1,4 @@
 "use client";
-import { AddIcon } from "@/app/icons/AddIcon";
 import toast from "react-hot-toast";
 import MaskImage from "@/app/assets/images/Mask_IMG.svg";
 import {
@@ -11,15 +10,13 @@ import {
   Button,
   useDisclosure,
   Textarea,
-  Card,
-  CardBody,
-  CardFooter,
   Skeleton,
   Tabs,
   Tab,
 } from "@nextui-org/react";
 import React from "react";
 import Image from "next/image";
+import { PlusGlyph } from "@/app/components/HeaderDashBoard";
 import { generatePostImage, createPost } from "@/lib/api/client";
 import type { ProjectDTO } from "@/types";
 
@@ -98,35 +95,31 @@ const HeaderProject: React.FC<{ projectId: string; project: ProjectDTO | null; o
 
   return (
     <>
-      <Button onPress={onOpen} className="post-pro bg-primary-500 text-primary-50 font-mono" endContent={<AddIcon />}>
-        New post
+      <Button onPress={onOpen} color="primary" className="font-semibold" startContent={<PlusGlyph />}>
+        Create post
       </Button>
-      <Modal backdrop="blur" isOpen={isOpen} onOpenChange={onOpenChange} onClose={resetForm} size="lg">
+      <Modal backdrop="opaque" isOpen={isOpen} onOpenChange={onOpenChange} onClose={resetForm} size="lg" scrollBehavior="inside">
         <ModalContent className="text-default-800">
           {(onModalClose) => (
             <>
-              <ModalHeader className="flex flex-col gap-1">Create New Post</ModalHeader>
-              <ModalBody>
+              <ModalHeader className="border-b border-divider text-[17px]">Create post</ModalHeader>
+              <ModalBody className="gap-5 py-5">
                 {isImageCreated ? (
-                  <div className="flex flex-col gap-10 justify-center items-center">
-                    <Card className="py-1 w-[300px]">
-                      <CardBody className="overflow-visible py-2">
-                        <Skeleton isLoaded={Boolean(imageURL)} className="rounded-lg">
-                          <Image
-                            alt="Generated post"
-                            className="object-cover rounded-xl"
-                            src={imageURL || MaskImage}
-                            width={300}
-                            height={200}
-                          />
-                        </Skeleton>
-                      </CardBody>
-                      {onCaptionView ? (
-                        <CardFooter className="flex flex-col items-start pt-0">
-                          <small className="text-default-500 webkit-box webkit-box-orient-vertical overflow-hidden">{post.caption}</small>
-                        </CardFooter>
+                  <div className="flex flex-col gap-5">
+                    <div className="mx-auto w-full max-w-[320px] overflow-hidden rounded-lg border border-divider bg-content1">
+                      <Skeleton isLoaded={Boolean(imageURL)}>
+                        <Image
+                          alt="Generated post"
+                          className="h-[220px] w-full object-cover"
+                          src={imageURL || MaskImage}
+                          width={320}
+                          height={220}
+                        />
+                      </Skeleton>
+                      {onCaptionView && post.caption ? (
+                        <p className="whitespace-pre-line p-3 text-sm text-default-800">{post.caption}</p>
                       ) : null}
-                    </Card>
+                    </div>
                     {onCaptionView ? (
                       <>
                         <Textarea
@@ -134,23 +127,36 @@ const HeaderProject: React.FC<{ projectId: string; project: ProjectDTO | null; o
                           name="caption"
                           value={post.caption}
                           onChange={handleChange}
-                          variant="underlined"
-                          description="Enter caption for your post."
+                          variant="bordered"
+                          label="Caption"
                           labelPlacement="outside"
-                          placeholder="Enter post caption"
+                          placeholder="Write a caption for your post"
+                          description={`Up to ${project?.captionLimit || 2200} characters.`}
                         />
-                        <Tabs selectedKey={publishMode} onSelectionChange={(key) => setPublishMode(key as "now" | "schedule")} fullWidth>
+                        <Tabs
+                          selectedKey={publishMode}
+                          onSelectionChange={(key) => setPublishMode(key as "now" | "schedule")}
+                          fullWidth
+                          color="primary"
+                          aria-label="Publish options"
+                        >
                           <Tab key="now" title="Publish now" />
                           <Tab key="schedule" title="Schedule for later" />
                         </Tabs>
                         {publishMode === "schedule" ? (
-                          <input
-                            type="datetime-local"
-                            className="w-full border-b border-default-300 bg-transparent py-2 text-default-800 outline-none"
-                            min={new Date(Date.now() + 60_000).toISOString().slice(0, 16)}
-                            value={scheduledAt}
-                            onChange={(event) => setScheduledAt(event.target.value)}
-                          />
+                          <label className="flex flex-col gap-1.5 text-sm font-medium text-default-800">
+                            Date and time
+                            <input
+                              type="datetime-local"
+                              className="w-full rounded-md border border-default-300 bg-transparent px-3 py-2 text-sm text-default-800 outline-none focus:border-primary-500"
+                              min={new Date(Date.now() + 60_000).toISOString().slice(0, 16)}
+                              value={scheduledAt}
+                              onChange={(event) => setScheduledAt(event.target.value)}
+                            />
+                            <span className="text-xs font-normal text-default-500">
+                              Scheduled posts are published once a day at 09:00 UTC, at the first run after this time.
+                            </span>
+                          </label>
                         ) : null}
                       </>
                     ) : null}
@@ -160,18 +166,18 @@ const HeaderProject: React.FC<{ projectId: string; project: ProjectDTO | null; o
                     name="prompt"
                     value={post.prompt}
                     onChange={handleChange}
-                    variant="underlined"
-                    description="Enter a prompt for your post image."
+                    variant="bordered"
+                    label="Image prompt"
                     labelPlacement="outside"
-                    placeholder="Enter post prompt"
+                    placeholder="Describe the image you want to generate"
+                    description="Use at least 11 characters."
                   />
                 )}
               </ModalBody>
-              <ModalFooter>
+              <ModalFooter className="border-t border-divider">
                 {isImageCreated ? (
                   <Button
-                    className="text-default-800 post-pro bg-primary-100"
-                    variant="light"
+                    className="bg-default-200 font-semibold text-default-800"
                     onPress={() => {
                       setPost({ ...initialPostValues, prompt: post.prompt, caption: post.caption });
                       setImageCreated(false);
@@ -183,8 +189,7 @@ const HeaderProject: React.FC<{ projectId: string; project: ProjectDTO | null; o
                   </Button>
                 ) : (
                   <Button
-                    className="text-default-800 post-pro bg-primary-100"
-                    variant="light"
+                    className="bg-default-200 font-semibold text-default-800"
                     onPress={() => {
                       resetForm();
                       onModalClose();
@@ -196,21 +201,23 @@ const HeaderProject: React.FC<{ projectId: string; project: ProjectDTO | null; o
                 {isImageCreated ? (
                   onCaptionView ? (
                     <Button
-                      className="post-pro bg-primary-500 text-default-50"
+                      color="primary"
+                      className="font-semibold"
                       onPress={submitPost}
                       isLoading={isPosting}
                       isDisabled={publishMode === "schedule" && !scheduledAt}
                     >
-                      {publishMode === "schedule" ? "Schedule" : "Post"}
+                      {publishMode === "schedule" ? "Schedule" : "Publish"}
                     </Button>
                   ) : (
-                    <Button className="post-pro bg-primary-500 text-default-50" onPress={() => setOnCaptionView(true)} isDisabled={!imageURL}>
-                      Write Caption
+                    <Button color="primary" className="font-semibold" onPress={() => setOnCaptionView(true)} isDisabled={!imageURL}>
+                      Write caption
                     </Button>
                   )
                 ) : (
                   <Button
-                    className="post-pro bg-primary-500 text-default-50"
+                    color="primary"
+                    className="font-semibold"
                     onPress={onSubmit}
                     isLoading={isLoading}
                     isDisabled={!post.prompt || post.prompt.length <= 10}

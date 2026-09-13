@@ -1,23 +1,20 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import toast from "react-hot-toast";
-import { Card, CardBody, CardFooter, Skeleton } from "@nextui-org/react";
+import { Skeleton } from "@nextui-org/react";
 import PostCard from "../../components/Card";
 import { getRecentPosts } from "@/lib/api/client";
-import { StaggerGrid, StaggerCell, staggerContainer, staggerItem } from "../../components/StaggerReveal";
 import type { PostDTO } from "@/types";
 
 function CardSkeleton() {
   return (
-    <Card className="py-1 w-[300px]">
-      <CardBody className="overflow-visible py-2">
-        <Skeleton className="rounded-xl w-[300px] h-[200px]" />
-      </CardBody>
-      <CardFooter className="flex flex-col items-start gap-2 pt-0">
-        <Skeleton className="rounded-full w-16 h-5" />
-        <Skeleton className="rounded-lg w-full h-4" />
-      </CardFooter>
-    </Card>
+    <div className="w-[260px] shrink-0 overflow-hidden rounded-lg border border-divider bg-content1">
+      <Skeleton className="h-[200px] w-full" />
+      <div className="flex flex-col gap-2 p-3">
+        <Skeleton className="h-5 w-16 rounded-md" />
+        <Skeleton className="h-4 w-full rounded-md" />
+      </div>
+    </div>
   );
 }
 
@@ -35,7 +32,7 @@ const CardsContainer: React.FC = () => {
 
   if (posts === null) {
     return (
-      <div className="flex overflow-auto hide-scroll gap-6 pt-4">
+      <div className="hide-scroll flex gap-4 overflow-x-auto">
         {[...Array(3)].map((_, i) => (
           <CardSkeleton key={i} />
         ))}
@@ -44,17 +41,22 @@ const CardsContainer: React.FC = () => {
   }
 
   if (posts.length === 0) {
-    return <p className="pt-4 text-default-500">No posts yet. Create a project and generate your first post to see it here.</p>;
+    return (
+      <div className="rounded-lg border border-dashed border-default-300 bg-default-100 px-6 py-10 text-center">
+        <p className="text-[15px] font-semibold text-default-900">No posts yet</p>
+        <p className="mt-1 text-sm text-default-600">Create a project and generate your first post to see it here.</p>
+      </div>
+    );
   }
 
   return (
-    <StaggerGrid variants={staggerContainer} initial="hidden" animate="show" className="flex overflow-auto hide-scroll gap-6 pt-4">
+    <div className="hide-scroll -mx-1 flex gap-4 overflow-x-auto px-1 pb-1">
       {posts.map((post) => (
-        <StaggerCell key={post.id} variants={staggerItem}>
+        <div key={post.id} className="w-[260px] shrink-0">
           <PostCard post={post} />
-        </StaggerCell>
+        </div>
       ))}
-    </StaggerGrid>
+    </div>
   );
 };
 

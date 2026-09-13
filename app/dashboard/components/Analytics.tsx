@@ -21,9 +21,9 @@ const Analytics: React.FC = () => {
 
   if (!analytics) {
     return (
-      <div className="pt-4 flex gap-6 flex-col sm:flex-row">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         {[...Array(3)].map((_, i) => (
-          <Skeleton key={i} className="rounded-large w-full sm:w-[300px] h-[100px]" />
+          <Skeleton key={i} className="h-[98px] rounded-lg" />
         ))}
       </div>
     );
@@ -39,19 +39,17 @@ const Analytics: React.FC = () => {
   ];
 
   return (
-    <>
-      <section id="analytics" className="pt-4 flex gap-6 flex-col sm:flex-row">
-        <InfoCard title="Total posts" count={analytics.totalPosts} icon={<GraphIcon />} bg="bg-primary-500" />
-        <InfoCard title="Projects" count={analytics.totalProjects} icon={<FollowersIcon />} bg="bg-secondary-500" />
-        <InfoCard title="Posted to Instagram" count={analytics.byStatus.posted} icon={<LikesIcon />} bg="bg-warning-600" />
-      </section>
-      <section className="pt-10 flex gap-6 flex-col sm:flex-row">
-        <div className="w-full flex flex-wrap gap-5">
-          <PostViewsChart data={postsPerWeekData} id="posts-per-week" title="Posts created (last 8 weeks)" chartColor="#d1471f" />
-          <PostViewsChart data={byStatusData} id="posts-by-status" title="Posts by status" chartColor="#215952" />
-        </div>
-      </section>
-    </>
+    <div className="flex flex-col gap-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+        <InfoCard title="Total posts" count={analytics.totalPosts} icon={<GraphIcon />} tone="blue" />
+        <InfoCard title="Projects" count={analytics.totalProjects} icon={<FollowersIcon />} tone="green" />
+        <InfoCard title="Posted to Instagram" count={analytics.byStatus.posted} icon={<LikesIcon />} tone="yellow" />
+      </div>
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+        <PostViewsChart data={postsPerWeekData} id="posts-per-week" title="Posts created" subtitle="Last 8 weeks" chartColor="#0866FF" />
+        <PostViewsChart data={byStatusData} id="posts-by-status" title="Posts by status" subtitle="All time" chartColor="#31A24C" />
+      </div>
+    </div>
   );
 };
 

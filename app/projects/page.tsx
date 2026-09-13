@@ -6,10 +6,8 @@ import NewProjectAction from "../components/HeaderDashBoard";
 
 const Projects: React.FC = () => {
   return (
-    <AppShell title="Projects" subtitle="Manage all of your projects here." actions={<NewProjectAction />}>
-      <div className="pt-6 w-full overflow-auto">
-        <ProjectsTable />
-      </div>
+    <AppShell title="Projects" subtitle="Create and manage the projects you generate posts for." actions={<NewProjectAction />}>
+      <ProjectsTable />
     </AppShell>
   );
 };
