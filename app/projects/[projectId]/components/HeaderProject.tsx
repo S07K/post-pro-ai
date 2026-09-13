@@ -153,6 +153,9 @@ const HeaderProject: React.FC<{ projectId: string; project: ProjectDTO | null; o
                               value={scheduledAt}
                               onChange={(event) => setScheduledAt(event.target.value)}
                             />
+                            <span className="text-xs font-normal text-default-500">
+                              Scheduled posts are published once a day at 09:00 UTC, at the first run after this time.
+                            </span>
                           </label>
                         ) : null}
                       </>
