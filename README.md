@@ -2,7 +2,7 @@
 
 An AI-powered social media post generator: create a project, generate a post image with DALL-E-3, write a caption, and publish immediately or schedule it for later to Instagram (via a connected Facebook Page).
 
-A single full-stack Next.js 14 (App Router) application — API routes, MongoDB/Mongoose data layer, and the UI all live in this repo. There is no separate backend service.
+A single full-stack Next.js 14 (App Router) application — API routes, MongoDB/Mongoose data layer, and the UI all live in this repo.
 
 ## Stack
 
@@ -80,7 +80,7 @@ seam (`lib/api/session.ts`) rather than through full NextAuth cookies/JWTs,
 so tests can set "the current user is X" directly and focus on what this
 app's own code does with that identity — most importantly, the ownership
 scoping on projects and posts (see `tests/integration/*-ownership.test.ts`),
-which is what fixed the IDOR that existed on the old backend.
+which ensures users can never read or change each other's data.
 
 - `tests/unit/` — pure logic: zod validation schemas, DTO serializers, the
   publish/scheduling state machine (with the Meta API layer mocked)
