@@ -1,10 +1,30 @@
-import axios from "axios";
+import axios, { isAxiosError } from "axios";
+import { FACEBOOK_GRAPH_VERSION } from "@/app/lib/utils";
 
-const FACEBOOK_API_ENDPOINT = process.env.FACEBOOK_API_ENDPOINT || "https://graph.facebook.com/v20.0";
+const FACEBOOK_API_ENDPOINT = process.env.FACEBOOK_API_ENDPOINT || `https://graph.facebook.com/${FACEBOOK_GRAPH_VERSION}`;
 const FACEBOOK_APP_ID = process.env.FACEBOOK_APP_ID || "";
 const FACEBOOK_APP_SECRET = process.env.FACEBOOK_APP_SECRET || "";
 
+/** Permissions the Facebook Login configuration must grant for publishing to Instagram. */
+export const REQUIRED_PERMISSIONS = [
+  "pages_show_list",
+  "pages_read_engagement",
+  "instagram_basic",
+  "instagram_content_publish",
+];
+
 export class MetaPublishError extends Error {}
+
+/** Pulls the human-readable message out of a Graph API error response, if there is one. */
+export function graphErrorMessage(error: unknown): string | null {
+  if (isAxiosError(error)) {
+    const message = error.response?.data?.error?.message;
+    if (typeof message === "string" && message) {
+      return message;
+    }
+  }
+  return null;
+}
 
 /** Checks whether a Facebook access token is still valid. */
 export async function isFacebookTokenValid(token: string): Promise<boolean> {
@@ -28,27 +48,59 @@ export async function exchangeForLongLivedToken(token: string): Promise<string> 
       },
     });
     return response.data?.access_token || token;
-  } catch {
+  } catch (error) {
+    // Log only the message: the axios error's config contains the token and app secret
+    console.error("[meta] long-lived token exchange failed:", graphErrorMessage(error) ?? "unknown error");
     return token;
   }
 }
 
-async function getInstagramBusinessAccountId(token: string): Promise<string> {
-  const params = { access_token: token };
-  const pagesResponse = await axios.get(`${FACEBOOK_API_ENDPOINT}/me/accounts`, { params });
-  const pageId = pagesResponse.data?.data?.[0]?.id;
-  if (!pageId) {
-    throw new MetaPublishError("No connected Facebook page found");
+/** Returns the required permissions the token was not granted. */
+export async function getMissingPermissions(token: string): Promise<string[]> {
+  const response = await axios.get(`${FACEBOOK_API_ENDPOINT}/me/permissions`, { params: { access_token: token } });
+  const granted = new Set(
+    (response.data?.data ?? [])
+      .filter((entry: { status?: string }) => entry.status === "granted")
+      .map((entry: { permission: string }) => entry.permission)
+  );
+  return REQUIRED_PERMISSIONS.filter((permission) => !granted.has(permission));
+}
+
+export type InstagramAccount = { pageId: string; pageName: string; instagramId: string };
+
+/** Finds the first Facebook Page shared with the app that has an Instagram professional account linked. */
+export async function findInstagramAccount(token: string): Promise<InstagramAccount> {
+  const response = await axios.get(`${FACEBOOK_API_ENDPOINT}/me/accounts`, {
+    params: { access_token: token, fields: "id,name,instagram_business_account", limit: 100 },
+  });
+  const pages: { id: string; name?: string; instagram_business_account?: { id?: string } }[] = response.data?.data ?? [];
+  if (pages.length === 0) {
+    throw new MetaPublishError("No Facebook Pages were shared with PostProAI. Reconnect and select the Page linked to your Instagram account.");
   }
 
-  const pageResponse = await axios.get(`${FACEBOOK_API_ENDPOINT}/${pageId}`, {
-    params: { ...params, fields: "instagram_business_account" },
-  });
-  const instagramId = pageResponse.data?.instagram_business_account?.id;
-  if (!instagramId) {
-    throw new MetaPublishError("No Instagram business account connected to this Facebook page");
+  const page = pages.find((candidate) => candidate.instagram_business_account?.id);
+  if (!page) {
+    throw new MetaPublishError("None of the Facebook Pages you shared has an Instagram professional account linked to it.");
   }
-  return instagramId;
+  return { pageId: page.id, pageName: page.name ?? "", instagramId: page.instagram_business_account!.id! };
+}
+
+/**
+ * Confirms a token can actually publish: every required permission is granted
+ * and a shared Page has an Instagram account. Throws MetaPublishError with a
+ * message meant for the user otherwise.
+ */
+export async function verifyInstagramConnection(token: string): Promise<InstagramAccount> {
+  try {
+    const missing = await getMissingPermissions(token);
+    if (missing.length > 0) {
+      throw new MetaPublishError(`Facebook didn't grant these permissions: ${missing.join(", ")}. Reconnect and allow all requested permissions.`);
+    }
+    return await findInstagramAccount(token);
+  } catch (error) {
+    if (error instanceof MetaPublishError) throw error;
+    throw new MetaPublishError(graphErrorMessage(error) ?? "Could not verify the Instagram connection");
+  }
 }
 
 async function createMediaContainer(instagramId: string, token: string, imageUrl: string, caption: string): Promise<string> {
@@ -86,6 +138,11 @@ function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
+function publishFailureReason(error: unknown) {
+  if (error instanceof MetaPublishError) return error.message;
+  return graphErrorMessage(error) ?? "Failed to publish to Instagram";
+}
+
 export type PublishResult = { status: "posted" } | { status: "processing"; containerId: string; instagramId: string; token: string } | { status: "failed"; reason: string };
 
 /**
@@ -96,7 +153,7 @@ export type PublishResult = { status: "posted" } | { status: "processing"; conta
  */
 export async function publishToInstagram(token: string, imageUrl: string, caption: string): Promise<PublishResult> {
   try {
-    const instagramId = await getInstagramBusinessAccountId(token);
+    const { instagramId } = await findInstagramAccount(token);
     const containerId = await createMediaContainer(instagramId, token, imageUrl, caption);
 
     const MAX_ATTEMPTS = 6;
@@ -115,8 +172,7 @@ export async function publishToInstagram(token: string, imageUrl: string, captio
 
     return { status: "processing", containerId, instagramId, token };
   } catch (error) {
-    const reason = error instanceof MetaPublishError ? error.message : "Failed to publish to Instagram";
-    return { status: "failed", reason };
+    return { status: "failed", reason: publishFailureReason(error) };
   }
 }
 
@@ -133,7 +189,6 @@ export async function finishPendingPublish(instagramId: string, token: string, c
     }
     return { status: "processing", containerId, instagramId, token };
   } catch (error) {
-    const reason = error instanceof MetaPublishError ? error.message : "Failed to publish to Instagram";
-    return { status: "failed", reason };
+    return { status: "failed", reason: publishFailureReason(error) };
   }
 }

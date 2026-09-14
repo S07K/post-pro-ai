@@ -1,7 +1,7 @@
 "use client";
 import React, { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { APP_ID, CONFIG_ID } from "@/app/lib/utils";
+import { APP_ID, CONFIG_ID, FACEBOOK_GRAPH_VERSION } from "@/app/lib/utils";
 import toast from "react-hot-toast";
 import PostCard from "@/app/components/Card";
 import HeaderProject from "./components/HeaderProject";
@@ -22,6 +22,8 @@ const NewProject: React.FC<NewProjectProps> = ({ params }) => {
   const projectId = params.projectId;
   const [project, setProject] = useState<ProjectDTO | null>(null);
   const [posts, setPosts] = useState<PostDTO[]>([]);
+  const [isSdkReady, setSdkReady] = useState(false);
+  const [isConnecting, setConnecting] = useState(false);
 
   const fetchProject = useCallback(async () => {
     try {
@@ -56,24 +58,59 @@ const NewProject: React.FC<NewProjectProps> = ({ params }) => {
     try {
       await setProjectFacebookAccess(projectId, token);
       await fetchProject();
-      toast.success("Connected successfully");
-    } catch {
-      toast.error("Error in connecting");
+      toast.success("Instagram connected");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Error in connecting");
+    } finally {
+      setConnecting(false);
     }
+  };
+
+  const initFacebookSdk = useCallback(() => {
+    if (!window.FB) return;
+    window.FB.init({
+      appId: APP_ID,
+      xfbml: false,
+      version: FACEBOOK_GRAPH_VERSION,
+    });
+    setSdkReady(true);
+  }, []);
+
+  const startFacebookLogin = () => {
+    if (!APP_ID || !CONFIG_ID) {
+      toast.error("Facebook Login isn't configured for this app yet");
+      return;
+    }
+    if (!window.FB) {
+      toast.error("Facebook is still loading. Try again in a moment.");
+      return;
+    }
+    setConnecting(true);
+    window.FB.login(
+      (response: any) => {
+        if (response.authResponse?.accessToken) {
+          connectFacebook(response.authResponse.accessToken);
+        } else {
+          setConnecting(false);
+          toast.error("Facebook login was cancelled or not completed");
+        }
+      },
+      { config_id: CONFIG_ID }
+    );
   };
 
   useEffect(() => {
     fetchProject();
     fetchPosts();
-
-    window.fbAsyncInit = function () {
-      window.FB.init({
-        appId: APP_ID,
-        xfbml: true,
-        version: "v20.0",
-      });
-    };
   }, [fetchProject, fetchPosts]);
+
+  // The SDK script only fires onLoad once; when it's already on the page (e.g. after
+  // navigating between projects) initialise it directly.
+  useEffect(() => {
+    if (window.FB) {
+      initFacebookSdk();
+    }
+  }, [initFacebookSdk]);
 
   const isConnected = Boolean(project?.connections.facebook);
 
@@ -91,7 +128,7 @@ const NewProject: React.FC<NewProjectProps> = ({ params }) => {
           </div>
         ) : (
           <>
-            <Container title="Connections" subtitle="Link an Instagram business account to publish posts from this project.">
+            <Container title="Connections" subtitle="Link an Instagram professional account to publish posts from this project.">
               <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
                 <div className="flex items-center gap-3">
                   <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-[#1877F2] text-white">
@@ -112,19 +149,12 @@ const NewProject: React.FC<NewProjectProps> = ({ params }) => {
                 ) : (
                   <Button
                     className="bg-[#1877F2] font-semibold text-white"
-                    startContent={<FacebookIcon />}
-                    onPress={() => {
-                      window.FB.login(
-                        (response: any) => {
-                          if (response.authResponse && response.status === "connected") {
-                            connectFacebook(response.authResponse.accessToken);
-                          }
-                        },
-                        { config_id: CONFIG_ID }
-                      );
-                    }}
+                    startContent={isConnecting ? null : <FacebookIcon />}
+                    isLoading={isConnecting}
+                    isDisabled={!isSdkReady}
+                    onPress={startFacebookLogin}
                   >
-                    Connect Instagram
+                    {isSdkReady ? "Connect Instagram" : "Loading Facebook…"}
                   </Button>
                 )}
               </div>
@@ -156,7 +186,12 @@ const NewProject: React.FC<NewProjectProps> = ({ params }) => {
           </>
         )}
       </AppShell>
-      <Script async defer crossOrigin="anonymous" src="https://connect.facebook.net/en_US/sdk.js" />
+      <Script
+        crossOrigin="anonymous"
+        src="https://connect.facebook.net/en_US/sdk.js"
+        strategy="afterInteractive"
+        onLoad={initFacebookSdk}
+      />
     </>
   );
 };
